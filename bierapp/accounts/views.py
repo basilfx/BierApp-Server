@@ -1,17 +1,21 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.csrf import csrf_protect
 from django.utils.http import is_safe_url
-from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, \
+    logout as auth_logout
 from django.contrib import messages
 
-from bierapp.accounts.models import User, UserMembershipInvite, UserMembership, Site
-from bierapp.accounts.forms import RegisterForm, UserMembershipInviteForm, SiteForm, ChangeProfileForm, AuthenticationForm, ChangePasswordForm, ChooseSiteForm
-from bierapp.accounts.decorators import resolve_membership, resolve_site, site_admin_required
+from bierapp.accounts.models import User, UserMembershipInvite, \
+    UserMembership, ROLE_ADMIN, ROLE_MEMBER, ROLE_GUEST
+from bierapp.accounts.forms import RegisterForm, UserMembershipInviteForm, \
+    SiteForm, ChangeProfileForm, AuthenticationForm, ChangePasswordForm, \
+    ChooseSiteForm
+from bierapp.accounts.decorators import resolve_membership
+
 
 @login_required
 def password(request):
@@ -28,9 +32,12 @@ def password(request):
 
     return render(request, "accounts_password.html", locals())
 
+
 @login_required
 def profile(request):
-    form = ChangeProfileForm(instance=request.user, data=request.POST or None, files=request.FILES or None)
+    form = ChangeProfileForm(
+        instance=get_object_or_404(User, pk=request.user.id),
+        data=request.POST or None, files=request.FILES or None)
 
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -42,11 +49,13 @@ def profile(request):
         return redirect("bierapp.accounts.views.profile")
     return render(request, "accounts_profile.html", locals())
 
+
 @login_required
 def sites(request):
-    sites = request.user.sites.all()
+    memberships = request.user.memberships.all()
 
     return render(request, "accounts_sites.html", locals())
+
 
 @login_required
 @resolve_membership
@@ -56,11 +65,13 @@ def site(request, membership):
     if request.membership.is_admin:
         memberships = site.memberships.all().order_by("is_hidden")
     else:
-        memberships = site.memberships.filter(is_hidden=False).order_by("is_hidden")
+        memberships = site.memberships.filter(
+            is_hidden=False).order_by("is_hidden")
 
     membership_invites = site.membership_invites.all()
 
     return render(request, "accounts_site.html", locals())
+
 
 @login_required
 def site_create(request):
@@ -70,7 +81,8 @@ def site_create(request):
         site = form.save()
 
         # Add current user as admin
-        membership = UserMembership(site=site, user=request.user, is_admin=True).save()
+        membership = UserMembership(
+            site=site, user=request.user, role=ROLE_ADMIN).save()
 
         # Post message
         messages.success(request, "Site created.")
@@ -79,6 +91,7 @@ def site_create(request):
         return redirect("bierapp.accounts.views.site", id=site.id)
     return render(request, "accounts_site_add.html", locals())
 
+
 @login_required
 @resolve_membership
 def site_switch(request, membership):
@@ -86,38 +99,85 @@ def site_switch(request, membership):
 
     return redirect(membership.site.get_absolute_url())
 
+
 @login_required
 @resolve_membership
-@site_admin_required
 def site_invite(request, membership):
-    form = UserMembershipInviteForm(membership.site, data=request.POST or None)
+    if request.membership.is_admin:
+        roles = [
+            (ROLE_GUEST, _("Guest")),
+            (ROLE_MEMBER, _("Member"))]
+    else:
+        roles = [(ROLE_MEMBER, _("Member"))]
+
+    form = UserMembershipInviteForm(
+        membership.site, roles, data=request.POST or None)
 
     if request.method == "POST" and form.is_valid():
+        # Update an existing invite instead of creating a new one. This will
+        # create a new form, providing an instance. Since it's already valid,
+        # the check can be skipped this time.
+        try:
+            form = UserMembershipInviteForm(
+                membership.site, roles, data=request.POST,
+                instance=UserMembershipInvite.objects.get(
+                    email=form.cleaned_data["email"], site=form.site))
+        except UserMembershipInvite.DoesNotExist:
+            pass
+
         invite = form.save()
 
+        # Send email to new user. First check if the user has deleted his
+        # account and doesn't want to receive any emails. If user does not
+        # exists, he or she can be emailed.
+        try:
+            email_user = not User.objects.get(email=invite.email).is_deleted
+        except User.DoesNotExist:
+            email_user = True
+
+        if email_user:
+            pass  # TODO
+
+        return redirect(
+            "bierapp.accounts.views.site_invite_done", id=membership.site.id)
     return render(request, "accounts_site_invite.html", locals())
 
+
 @login_required
-@resolve_site
-def site_invite_activate(request, site):
-    # Search invite
+def site_invite_done(request, id):
+    return render(request, "accounts_site_invite_done.html", locals())
+
+
+@login_required
+def invites(request):
+    membership_invites = UserMembershipInvite.objects.filter(
+        email=request.user.email)
+    return render(request, "accounts_invites.html", locals())
+
+
+@login_required
+def invite_activate(request):
+    accept = not request.GET.get("refuse")
+
+    # Search invite. If it does not exist, the activate will result in an error
+    # page.
     try:
-        invite = UserMembershipInvite.objects.get(site=site, email=request.GET["email"], token=request.GET["token"])
+        invite = UserMembershipInvite.objects.get(
+            email=request.user.email, token=request.GET.get("token"))
     except UserMembershipInvite.DoesNotExist:
-        return render(request, "accounts_site_invite_activate.html", locals())
+        invite = None
 
-    # Search user for given email
-    try:
-        user = User.objects.get(email=invite.email)
-    except User.DoesNotExist:
-        return redirect("bierapp.accounts.views.register")
-
-    # Convert it into real membership and delete invite
-    UserMembership(site=site, user=user).save()
-    invite.delete()
+    # Convert it into real membership if accepted. Eventually delete the actual
+    # invite.
+    if invite:
+        if accept:
+            UserMembership(
+                site=invite.site, user=request.user, role=invite.role).save()
+        invite.delete()
 
     # Done
-    return render(request, "accounts_site_invite_activate.html", locals())
+    return render(request, "accounts_invite_activate.html", locals())
+
 
 def register(request):
     form = RegisterForm(data=request.POST or None)
@@ -127,7 +187,9 @@ def register(request):
         form.save()
 
         # Log user in
-        user = authenticate(username=form.cleaned_data["email"], password=form.cleaned_data["password1"])
+        user = authenticate(
+            username=form.cleaned_data["email"],
+            password=form.cleaned_data["password1"])
         auth_login(request, user)
 
         # Redirect to done
@@ -135,20 +197,23 @@ def register(request):
 
     return render(request, "accounts_register.html", locals())
 
+
 def register_done(request):
     return render(request, "accounts_register_done.html", locals())
+
 
 def login(request):
     """
     Login a user, the default action for pages that require login.
 
-    In addition, this method supports the GET paramter `choose_site", which will
-    redirect the user to a page for choosing a site. This is useful during
+    In addition, this method supports the GET paramter `choose_site", which
+    will redirect the user to a page for choosing a site. This is useful during
     OAUTH2 related requests.
     """
 
     is_authenticated = request.user.is_authenticated()
-    is_choose_site = "choose_site" in request.GET or "oauth2/authorize" in request.META.get("HTTP_REFERER", "")
+    is_choose_site = "choose_site" in request.GET or \
+        "oauth2/authorize" in request.META.get("HTTP_REFERER", "")
 
     # Verify redirect URL
     redirect_to = request.REQUEST.get(REDIRECT_FIELD_NAME, False)
@@ -166,7 +231,8 @@ def login(request):
 
             if form.is_valid():
                 site = form.cleaned_data["site"]
-                membership = UserMembership.objects.get(user=request.user, site=site)
+                membership = UserMembership.objects.get(
+                    user=request.user, site=site)
                 request.session["membership_id"] = membership.id
 
                 return redirect(redirect_to)
@@ -180,7 +246,8 @@ def login(request):
 
                 if is_choose_site:
                     form = ChooseSiteForm(request.user.sites.all())
-                    return render(request, "accounts_site_choose.html", locals())
+                    return render(
+                        request, "accounts_site_choose.html", locals())
                 return redirect(redirect_to)
     elif is_authenticated:
         if is_choose_site:
@@ -192,6 +259,7 @@ def login(request):
 
     # Default is to show login form
     return render(request, "accounts_login.html", locals())
+
 
 def logout(request):
     # Logout

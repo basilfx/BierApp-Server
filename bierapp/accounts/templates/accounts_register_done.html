@@ -10,7 +10,9 @@
         {% url 'bierapp.accounts.views.index' as profile_url %}
 
         {% blocktrans %}
-            Your account is created. Click <a href="{{profile_url}}">here</a> to go to your profile page! Be sure to create a site, or inform others to invite you!
+            Your account is created. Be sure to create a site, or inform others to invite you!
         {% endblocktrans %}
     </p>
+
+    <a href="{% url 'bierapp.accounts.views.profile' %}">{% trans 'Go to profile' %}</a>
 {% endblock content %}

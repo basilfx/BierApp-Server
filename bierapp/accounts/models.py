@@ -8,8 +8,8 @@ from custom_user.models import AbstractEmailUser, EmailUserManager
 
 import uuid
 
-ROLE_ADMIN = 2
-ROLE_MEMBER = 1
+ROLE_ADMIN = 1
+ROLE_MEMBER = 2
 ROLE_GUEST = 3
 
 
@@ -38,8 +38,8 @@ class User(TimeStampedModel, AbstractEmailUser):
     """
     """
 
-    first_name = models.CharField(_("first name"), max_length=30, blank=False)
-    last_name = models.CharField(_("last name"), max_length=30, blank=False)
+    first_name = models.CharField(_("first name"), max_length=128, blank=False)
+    last_name = models.CharField(_("last name"), max_length=128, blank=False)
 
     birthdate = models.DateField(null=True)
 
@@ -48,6 +48,8 @@ class User(TimeStampedModel, AbstractEmailUser):
         upload_to=lambda x, y: "avatars/%d_%s" % (x.id, y), null=True)
     avatar_width = models.PositiveIntegerField(null=True)
     avatar_height = models.PositiveIntegerField(null=True)
+
+    is_deleted = models.BooleanField(default=False, null=False)
 
     objects = UserManager()
 
@@ -86,17 +88,18 @@ class UserMembershipInvite(TimeStampedModel, models.Model):
     site = models.ForeignKey("Site", related_name="membership_invites")
 
     email = models.EmailField(null=False, blank=False)
-    token = models.CharField(max_length=100, null=False, blank=False)
+    token = models.CharField(max_length=128, null=False, blank=False)
+    role = models.PositiveIntegerField(default=ROLE_MEMBER, null=False)
 
     class Meta:
-        unique_together = [("site", "email")]
+        unique_together = (("site", "email"), )
 
     def __unicode__(self):
         return u"%s -> %s (%s)" % (self.site, self.email, self.token)
 
     def save(self, *args, **kwargs):
-        # Generate unique token
-        if self.id is None:
+        # Generate unique token if empty
+        if not self.token:
             self.token = uuid.uuid4().hex
 
         # Save
@@ -111,14 +114,14 @@ class UserMembership(TimeStampedModel, models.Model):
     user = models.ForeignKey("User", related_name="memberships")
 
     position = models.PositiveIntegerField(default=1, null=False)
-    role = models.PositiveIntegerField(default=1, null=False)
+    role = models.PositiveIntegerField(default=ROLE_MEMBER, null=False)
 
     is_hidden = models.BooleanField(default=False, null=False)
     is_preferred = models.BooleanField(default=False, null=False)
 
     class Meta:
         ordering = ("position",)
-        unique_together = [("user", "site")]
+        unique_together = (("user", "site"), )
 
     def __unicode__(self):
         return u"%s -> %s" % (self.user, self.site)
@@ -141,14 +144,14 @@ class Site(TimeStampedModel, models.Model):
     """
 
     name = models.CharField(max_length=100)
-    members = models.ManyToManyField(
+    users = models.ManyToManyField(
         "User", through="UserMembership", related_name="sites")
 
     objects = models.Manager()
     api_objects = models.Manager()
 
     class Meta:
-        ordering = ["name"]
+        ordering = ("name", )
 
     def __unicode__(self):
         return unicode(self.name)

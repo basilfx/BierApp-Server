@@ -63,15 +63,14 @@ class UserInfoSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    user_type = serializers.Field()
+    role = serializers.Field()
     avatar = serializers.SerializerMethodField("get_avatar")
-    # product_info = ProductInfoSerializer()
 
     class Meta:
         model = User
         fields = (
             "id", "first_name", "last_name", "avatar", "avatar_height",
-            "avatar_width", "user_type", "date_changed")
+            "avatar_width", "role", "date_changed")
 
     def get_avatar(self, user):
         request = self.context["request"]

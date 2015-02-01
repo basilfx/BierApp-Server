@@ -11,13 +11,17 @@ urlpatterns = patterns(
     (r"register/$", "bierapp.accounts.views.register"),
     (r"register/done/$", "bierapp.accounts.views.register_done"),
 
+    # Invites
+    (r"invites/$", "bierapp.accounts.views.invites"),
+    (r"invites/activate/$", "bierapp.accounts.views.invite_activate"),
+
     # Sites
     (r"sites/$", "bierapp.accounts.views.sites"),
     (r"sites/create/$", "bierapp.accounts.views.site_create"),
     (r"sites/(?P<id>\d+)/$", "bierapp.accounts.views.site"),
     (r"sites/(?P<id>\d+)/switch/$", "bierapp.accounts.views.site_switch"),
+    (r"sites/(?P<id>\d+)/invite/done/$", "bierapp.accounts.views.site_invite_done"),
     (r"sites/(?P<id>\d+)/invite/$", "bierapp.accounts.views.site_invite"),
-    (r"sites/(?P<id>\d+)/invite/activate/$", "bierapp.accounts.views.site_invite_activate"),
 
     # Authentication
     (r"login/$", "bierapp.accounts.views.login"),

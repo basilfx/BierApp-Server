@@ -94,7 +94,7 @@
                     <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
                         <ul class="nav navbar-nav navbar-left">
                             {% if request.user.is_authenticated %}
-                                {% if request.site %}
+                                {% if request.membership.is_member %}
                                     <li class="dropdown">
                                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                                             {% trans 'Balances' %} <b class="caret"></b>
@@ -111,9 +111,6 @@
                                     </li>
                                     <li>
                                         <a href="{% url 'bierapp.core.views.product_groups' %}">{% trans 'Product groups' %}</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'bierapp.core.views.guests' %}">{% trans 'Guests' %}</a>
                                     </li>
                                     <li>
                                         <a href="{% url 'bierapp.core.views.transactions' %}">{% trans 'Transactions' %}</a>
@@ -147,6 +144,15 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'bierapp.accounts.views.sites' %}">{% trans 'My Sites' %}</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'bierapp.accounts.views.invites' %}">
+                                                {% trans 'My Invites' %}
+
+                                                {% if request.membership_invites|length > 0 %}
+                                                    <span class="badge pull-right">{{ request.membership_invites|length }}</span>
+                                                {% endif %}
+                                            </a>
                                         </li>
                                         <li class="divider"></li>
                                         <li>

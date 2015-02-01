@@ -39,7 +39,8 @@ class RangeFilter(filters.FilterSet):
     before = filters.DateTimeFilter(name="date_created", lookup_type="lte")
     after = filters.DateTimeFilter(name="date_created", lookup_type="gte")
 
-    description = filters.CharFilter(name="description", lookup_type="icontains")
+    description = filters.CharFilter(
+        name="description", lookup_type="icontains")
 
     class Meta:
         model = Transaction

@@ -6,74 +6,99 @@
         <h1>{{ site }}</h1>
     </div>
 
-
-    <p>
-        <div class="row">
-            <div class="col-md-8">
-                {% trans 'The following users are a member of this site. An admin can invite new users to this site.' %}
-            </div>
-            <div class="col-md-4">
-                <div class="btn-toolbar pull-right no-margin">
-                    <div class="btn-group">
-                        {% if membership.is_admin %}
+    {% if membership.is_member %}
+        <p>
+            <div class="row">
+                <div class="col-md-8">
+                    {% trans 'The following users are a member of this site. An admin can invite new users to this site.' %}
+                </div>
+                <div class="col-md-4">
+                    <div class="btn-toolbar pull-right no-margin">
+                        {% if membership.is_member %}
                             <a class="btn btn-success" href="{% url 'bierapp.accounts.views.site_invite' id=site.id %}">
-                                {% trans 'Invite users' %}
+                                {% if membership.is_admin %}
+                                    {% trans 'Invite guest or member' %}
+                                {% else %}
+                                    {% trans 'Invite guest' %}
+                                {% endif %}
                             </a>
                         {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
-    </p>
+        </p>
 
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>{% trans 'User' %}</th>
-                <th>{% trans 'Since' %}</th>
-                <th>{% trans 'Role' %}</th>
-                <th>{% trans 'Actions' %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if memberships|length > 0 or membership_invites|length > 0 %}
-                {% for membership in memberships %}
-                    <tr>
-                        <td>{{ membership.user }}</td>
-                        <td>
-                            {{ membership.created|date:"Y-m-d" }}
-                        </td>
-                        <td>
-                            {% if membership.is_hidden %}
-                                {% trans 'Hidden' %}
-                            {% elif membership.is_admin %}
-                                {% trans 'Admin' %}
-                            {% else %}
-                                {% trans 'User' %}
-                            {% endif %}
-                        </td>
-                        <td>
-
-                        </td>
-                    </tr>
-                {% endfor %}
-
-                {% for membership_invite in membership_invites %}
-                    <tr>
-                        <td>{{ membership.email }}</td>
-                        <td>
-                            {% trans 'Invited' %}
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-            {% else %}
+        <table class="table table-bordered table-striped">
+            <thead>
                 <tr>
-                    <td colspan="3">{% trans 'No members or invited members to show' %}</td>
+                    <th>{% trans 'User' %}</th>
+                    <th>{% trans 'Since' %}</th>
+                    <th>{% trans 'Role' %}</th>
+                    {% if request.membership.is_admin %}
+                        <th>{% trans 'Hidden' %}</th>
+                    {% endif %}
+                    <th>{% trans 'Actions' %}</th>
                 </tr>
-            {% endif %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% if memberships|length > 0 or membership_invites|length > 0 %}
+                    {% for membership in memberships %}
+                        <tr>
+                            <td>{{ membership.user }}</td>
+                            <td>
+                                {{ membership.created|date:"Y-m-d H:i" }}
+                            </td>
+                            <td>
+                                {% if membership.is_admin %}
+                                    {% trans 'Admin' %}
+                                {% elif membership.is_member %}
+                                    {% trans 'Member' %}
+                                {% elif membership.is_guest %}
+                                    {% trans 'Guest' %}
+                                {% endif %}
+                            </td>
+                            {% if request.membership.is_admin %}
+                                <td>
+                                    {% if membership.is_hidden %}
+                                        {% trans 'Yes' %}
+                                    {% else %}
+                                        {% trans 'No' %}
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                            <td>
 
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    {% for membership_invite in membership_invites %}
+                        <tr>
+                            <td>{{ membership_invite.email }}</td>
+                            <td>{{ membership_invite.created|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% trans 'Invited' %}
+                            </td>
+                            {% if request.membership.is_admin %}
+                                <td></td>
+                            {% endif %}
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="{% if request.membership.is_admin %}4{% else %}3{% endif %}">
+                            {% trans 'No members or invited members to show.' %}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+            {% blocktrans with date=membership.created|date:"Y-m-d H:i" %}
+                You are a guest since {{ date }}. There are no options for you here.
+            {% endblocktrans %}
+        </p>
+    {% endif %}
 {% endblock content %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'User invited' %}</h1>
+    </div>
+
+    <p>
+        {% blocktrans %}
+            User has been invited. He or she will receive an email to confirm membership. If the user does not have an
+            account yet, it should register first.
+        {% endblocktrans %}
+    </p>
+
+    <a href="{% url 'bierapp.accounts.views.site' id=site.id %}">{% trans 'Return to site' %}</a>
+{% endblock content %}

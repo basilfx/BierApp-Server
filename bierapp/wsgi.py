@@ -15,11 +15,9 @@ framework.
 
 # Monkey patches
 from gevent import monkey; monkey.patch_all(); # noqa
-import pymysql; pymysql.install_as_MySQLdb(); # noqa
 
 # Actual imports
 import os
-
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bierapp.settings.local")
 

@@ -82,17 +82,19 @@ def balance_user(request, user):
 @login_required
 def balance_products(request):
     user_ids = [str(x.pk) for x in request.site.members.all()]
-    rows = User.objects.raw("""SELECT u.*, IFNULL(total_value, 0) AS total_value, IFNULL(total_count, 0) AS total_count, p.id AS product_id, p.product_group_id AS product_group_id
-                               FROM accounts_user u
-                               CROSS JOIN bierapp_product p
-                               LEFT JOIN (
-                                   SELECT accounted_user_id, product_id, SUM(value) AS total_value, SUM(count) AS total_count
-                                   FROM bierapp_transactionitem x, bierapp_transaction y
-                                   WHERE x.transaction_id = y.id AND y.site_id = %d AND x.accounted_user_id IN (%s)
-                                   GROUP BY accounted_user_id, product_id
-                               ) t ON u.id=t.accounted_user_id AND p.id=t.product_id
-                               WHERE u.id IN (%s)
-                               ORDER BY u.id""" % (request.site.pk, ",".join(user_ids), ",".join(user_ids)))
+    rows = User.objects.raw(
+        """
+        SELECT u.*, IFNULL(total_value, 0) AS total_value, IFNULL(total_count, 0) AS total_count, p.id AS product_id, p.product_group_id AS product_group_id
+        FROM accounts_user u
+        CROSS JOIN core_product p
+        LEFT JOIN (
+           SELECT accounted_user_id, product_id, SUM(value) AS total_value, SUM(count) AS total_count
+           FROM core_transactionitem x, core_transaction y
+           WHERE x.transaction_id = y.id AND y.site_id = %d AND x.accounted_user_id IN (%s)
+           GROUP BY accounted_user_id, product_id
+        ) t ON u.id=t.accounted_user_id AND p.id=t.product_id
+        WHERE u.id IN (%s)
+        ORDER BY u.id""" % (request.site.pk, ",".join(user_ids), ",".join(user_ids)))
 
     product_groups = dict((x.pk, x) for x in ProductGroup.objects.filter(pk__in=[ y.product_group_id for y in rows ]))
     products = dict((x.pk, x) for x in Product.objects.filter(pk__in=[ y.product_id for y in rows ]))

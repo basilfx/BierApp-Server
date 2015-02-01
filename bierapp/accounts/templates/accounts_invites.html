@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'My invites' %}</h1>
+    </div>
+
+    <p>
+        {% trans 'If you have been invited for a site, any invites will appear below. You can choose to accept an invite, or refuse it.' %}
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>{% trans 'Site' %}</th>
+                <th>{% trans 'Since' %}</th>
+                <th>{% trans 'Actions' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for membership_invite in membership_invites %}
+                <tr>
+                    <td>{{ membership_invite.email }}</td>
+                    <td>{{ membership_invite.created|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        {% url 'bierapp.accounts.views.invite_activate' as activate_url %}
+                        <a class="btn btn-success" href="{{ activate_url }}?token={{ membership_invite.token }}">Activate</a>
+                        <a class="btn btn-danger" href="{{ activate_url }}?token={{ membership_invite.token }}&refuse=1">Refuse</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">
+                        {% trans 'No pending invites to show.' %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

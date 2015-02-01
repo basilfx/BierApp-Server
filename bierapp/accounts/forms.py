@@ -64,7 +64,7 @@ class ChangeProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("avatar", )
+        fields = ("first_name", "last_name", "birthdate", "avatar", )
 
 
 class RegisterForm(forms.ModelForm):
@@ -128,7 +128,6 @@ class ChooseSiteForm(forms.Form):
 
 
 class SiteForm(forms.ModelForm):
-
     helper = SiteFormHelper()
 
     class Meta:
@@ -137,13 +136,13 @@ class SiteForm(forms.ModelForm):
 
 
 class UserMembershipInviteForm(forms.ModelForm):
-
     helper = UserMembershipInviteFormHelper()
 
-    def __init__(self, site, *args, **kwargs):
+    def __init__(self, site, roles, *args, **kwargs):
         super(UserMembershipInviteForm, self).__init__(*args, **kwargs)
 
         self.site = site
+        self.fields["role"].choices = roles
 
     def save(self, commit=True):
         instance = super(UserMembershipInviteForm, self).save(commit=False)
@@ -156,4 +155,7 @@ class UserMembershipInviteForm(forms.ModelForm):
 
     class Meta:
         model = UserMembershipInvite
-        fields = ("email", )
+        fields = ("email", "role")
+        widgets = {
+            "role": forms.RadioSelect(),
+        }

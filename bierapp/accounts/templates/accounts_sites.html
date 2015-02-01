@@ -7,20 +7,50 @@
     </div>
 
     <p>
-        {% trans 'You are a member of the following sites.' %}
+        <div class="row">
+            <div class="col-md-8">
+                {% trans 'You are a member of the following sites. Feel free to create your own site!' %}
+            </div>
+            <div class="col-md-4">
+                <div class="btn-toolbar pull-right no-margin">
+                    <a class="btn btn-success" href="{% url 'bierapp.accounts.views.site_create' %}">
+                        {% trans 'Create site' %}
+                    </a>
+                </div>
+            </div>
+        </div>
     </p>
 
-    <ul>
-        {% for site in sites %}
-            <li>
-                <a href="{{ site.get_absolute_url }}">{{ site }}</a>
-            </li>
-        {% empty %}
-            <li>
-                {% trans 'No sites available' %}
-            </li>
-        {% endfor %}
-    </ul>
-
-    <a href="{% url 'bierapp.accounts.views.site_create' %}">{% trans 'Add site' %}</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>{% trans 'Site' %}</th>
+                <th>{% trans 'Since' %}</th>
+                <th>{% trans 'Actions' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for membership in memberships %}
+                <tr>
+                    <td>
+                        <a href="{{ membership.site.get_absolute_url }}">
+                            {{ membership.site.name }}
+                        </a>
+                    </td>
+                    <td>{{ membership.created|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        <a class="btn btn-primary" href="{% url 'bierapp.accounts.views.site_switch' id=membership.site.id %}">
+                            {% trans 'Switch' %}
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">
+                        {% trans 'No sites available' %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock content %}

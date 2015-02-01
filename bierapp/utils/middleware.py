@@ -1,12 +1,11 @@
-from django.utils import timezone
-
 from rest_framework import exceptions
 from rest_framework.authentication import get_authorization_header
 
 from provider.oauth2.models import AccessToken
 
-from bierapp.accounts.models import UserMembership
+from bierapp.accounts.models import UserMembership, UserMembershipInvite
 from bierapp.oauth2.models import AccessTokenMembership
+
 
 class OAuth2MiddlewareRequest(object):
     def process_request(self, request):
@@ -58,6 +57,7 @@ class OAuth2MiddlewareRequest(object):
             request.membership = access_token_membership.membership
             request.site = access_token_membership.membership.site
 
+
 class SiteMiddlewareRequest(object):
     def process_request(self, request):
         """
@@ -69,7 +69,7 @@ class SiteMiddlewareRequest(object):
         the parameter "request.membership" will not exist.
         """
 
-        # Don"t do the same thing twice
+        # Don't do the same thing twice
         if hasattr(request, "membership"):
             return
 
@@ -77,19 +77,28 @@ class SiteMiddlewareRequest(object):
             membership_id = request.session.get("membership_id", False)
 
             try:
-                request.membership = UserMembership.objects.select_related("site").get(pk=membership_id, user=request.user)
+                request.membership = UserMembership.objects.select_related(
+                    "site").get(pk=membership_id, user=request.user)
             except UserMembership.DoesNotExist:
                 try:
-                    request.membership = UserMembership.objects.select_related("site").filter(user=request.user).order_by("-is_preferred")[0]
+                    request.membership = UserMembership.objects.select_related(
+                        "site").filter(
+                            user=request.user).order_by("-is_preferred")[0]
 
                     # Update session so it does not cost two queries next time
                     if membership_id != request.membership.id:
-                        request.session["membership_id"] = request.membership.id
+                        request.session["membership_id"] = \
+                            request.membership.id
                 except IndexError:
                     pass
 
-            # Required to stay compatible with API, where memberships may not be applicable
+            # Required to stay compatible with API, where memberships may not
+            # be applicable
             if hasattr(request, "membership"):
                 request.site = request.membership.site
             else:
                 request.site = None
+
+            # Show pending membership invites
+            request.membership_invites = UserMembershipInvite.objects.filter(
+                email=request.user.email)

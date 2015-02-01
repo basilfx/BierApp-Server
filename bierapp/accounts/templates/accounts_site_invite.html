@@ -3,16 +3,14 @@
 
 {% block content %}
     <div class="page-header">
-        <h1>{% trans 'Invite user' %}</h1>
+        <h1>
+            {% if membership.is_admin %}
+                {% trans 'Invite guest or member' %}
+            {% else %}
+                {% trans 'Invite member' %}
+            {% endif %}
+        </h1>
     </div>
-
-    {% if invite %}
-        <div class="alert alert-info">
-            {% trans 'User has been invited. He or she will receive an email to confirm membership.' %}
-
-            <a href="{% url 'bierapp.accounts.views.site_invite_activate' id=invite.site.id %}?token={{ invite.token }}&email={{ invite.email }}">HACK TO ACTIVATE</a>
-        </div>
-    {% endif %}
 
     <p>
         {% blocktrans with name=membership.site %}
