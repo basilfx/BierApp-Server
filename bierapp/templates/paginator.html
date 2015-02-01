@@ -1,0 +1,45 @@
+{% if objects.paginator > 1 %}
+    {% load url_helpers %}
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <ul class="pagination ">
+                {% if objects.has_previous %}
+                    <li>
+                        <a href="?{% update_query_string page=objects.previous_page_number %}">&larr;</a>
+                    </li>
+                {% else %}
+                    <li class="disabled">
+                        <span>&larr;</span>
+                    </li>
+                {% endif %}
+
+                {% for i in objects.paginator.show_page_range %}
+                    {% if i == -1 %}
+                        <li class="disabled">
+                            <span>&hellip;</span>
+                        </li>
+                    {% elif i == objects.number %}
+                        <li class="active">
+                            <span>{{ i }}</span>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="?{% update_query_string page=i %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if objects.has_next %}
+                    <li>
+                        <a href="?{% update_query_string page=objects.next_page_number %}">&rarr;</a>
+                    </li>
+                {% else %}
+                    <li class="disabled">
+                        <span>&rarr; </span>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+{% endif %}

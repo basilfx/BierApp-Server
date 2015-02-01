@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load i18n static crispy_forms_tags %}
+
+{% block head %}
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'dcjs/dc.css' %}">
+
+    <style type="text/css">
+        .dc-chart {
+            float: none !important;
+            text-align: center;
+        }
+    </style>
+
+    {% if UNCOMPILED_RESOURCES %}
+        <!-- JavaScript -->
+        <script type="text/javascript" src="{% static 'd3/d3.js' %}"></script>
+        <script type="text/javascript" src="{% static 'crossfilter/crossfilter.js' %}"></script>
+        <script type="text/javascript" src="{% static 'dcjs/dc.js' %}"></script>
+    {% else %}
+        <!-- JavaScript -->
+        <script type="text/javascript" src="{% static 'd3/d3.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'crossfilter/crossfilter.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'dcjs/dc.min.js' %}"></script>
+    {% endif %}
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#button-range-submit").click(function(e) {
+                e.preventDefault();
+                $("#modal-range form").submit();
+            });
+        });
+
+        $(document).ready(function() {
+            var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
+            var daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+            var lowerCount = function(d) { return d.count < 0 ? Math.abs(d.count) : 0; }
+            var upperCount = function(d) { return d.count >= 0 ? d.count : 0; }
+
+            var charts = window.charts = {
+                transactionsByDay: dc.barChart("#transactions-by-day"),
+
+                totalInByUser: dc.pieChart("#total-in-by-user"),
+                totalOutByUser: dc.pieChart("#total-out-by-user"),
+
+                totalInByProduct: dc.pieChart("#total-in-by-product"),
+                totalOutByProduct: dc.pieChart("#total-out-by-product"),
+
+                userInByDay: dc.barChart("#user-in-by-day"),
+                userOutByDay: dc.barChart("#user-out-by-day"),
+
+                punchCardIn: dc.heatMap("#punch-card-in"),
+                punchCardOut: dc.heatMap("#punch-card-out"),
+
+                dataCount: dc.dataCount("#data-count")
+            }
+
+            d3.json("{{ action|safe }}", function(data) {
+                var userIds = [];
+
+                if (!data || !data.length) {
+                    $("#spinner").hide();
+                    $("#error").show();
+                    return;
+                }
+
+                data.forEach(function (e) {
+                    e.date = dateFormat.parse(e.date);
+                    e.day = d3.time.day(e.date);
+                    e.hour = d3.time.hour(e.date);
+
+                    if (userIds.indexOf(e.user_id) == -1) {
+                        userIds.push(e.user_id);
+                    }
+                });
+
+                var firstDate = d3.min(data, function(d) { return d.date });
+                var lastDate =  d3.max(data, function(d) { return d.date });
+
+                var data = window.data = crossfilter(data);
+
+                var dimensions = {
+                    days: data.dimension(function(d) { return d.day }),
+                    users: data.dimension(function(d) { return d.user }),
+                    products: data.dimension(function(d) { return d.product }),
+                    dayOfWeek: data.dimension(function(d) { return [+d.date.getDay(), +d.date.getHours()] })
+                };
+
+                var groups = {
+                    productsIn: dimensions.products.group().reduceSum(upperCount),
+                    productsOut: dimensions.products.group().reduceSum(lowerCount),
+                    usersIn: dimensions.users.group().reduceSum(upperCount),
+                    usersOut: dimensions.users.group().reduceSum(lowerCount),
+                    totalIn: data.groupAll().reduceSum(upperCount),
+                    totalOut: data.groupAll().reduceSum(lowerCount)
+                }
+
+                var pieChart = function(dest, dimension, group, all) {
+                    return dest
+                        .width(460)
+                        .height(480)
+                        .radius(220)
+                        .innerRadius(30)
+                        .dimension(dimension)
+                        .group(group)
+                        .renderLabel(true)
+                        .legend(dc.legend())
+                        .label(function (d) {
+                            return d.key + " (" + Math.round(d.value / all.value() * 100, 1) + "%)";
+                        });
+                }
+
+                var barChart = function(dest, dimension) {
+                    return dest
+                        .width(960)
+                        .height(320)
+                        .margins({top: 20, right: 50, bottom: 20, left: 50})
+                        .dimension(dimension)
+                        .x(d3.time.scale().domain([firstDate, lastDate]))
+                        .elasticY(true)
+                        .elasticX(true)
+                        .xAxisPadding(30)
+                        .round(d3.time.days.round)
+                        .xUnits(d3.time.days)
+                        .renderHorizontalGridLines(true)
+                        .renderVerticalGridLines(true)
+                }
+
+                var heatChart = function(dest, dimension, group) {
+                    var maxValue = group.top(1)[0].value;
+
+                    dest
+                        .width(780)
+                        .height(180)
+                        .margins({top: 20, right: 50, bottom: 20, left: 50})
+                        .dimension(dimension)
+                        .group(group)
+                        .xBorderRadius(0)
+                        .yBorderRadius(0)
+                        .rows(d3.scale.ordinal().domain(daysOfWeek))
+                        .valueAccessor(function(d) { return daysOfWeek[d.key[0]]; })
+                        .keyAccessor(function(d) { return d.key[1]; })
+                        .colorAccessor(function(d) { return d.value; })
+                        .colors(d3.scale.linear().domain([0, maxValue]).range(["#0066FF", "#FF0000"]))
+                        .calculateColorDomain();
+
+                    // Color borders, by overriding the redraw method.
+                    var oldRedraw = dest._doRedraw;
+
+                    dest._doRedraw = function() {
+                        oldRedraw();
+
+                        dest.selectAll("g.box-group")
+                            .attr("stroke-width", 1)
+                            .attr("stroke", "#ccc")
+                    }
+
+                    return dest;
+                }
+
+                pieChart(charts.totalInByUser, dimensions.users, groups.usersIn, groups.totalIn);
+                pieChart(charts.totalOutByUser, dimensions.users, groups.usersOut, groups.totalOut);
+                pieChart(charts.totalInByProduct, dimensions.products, groups.productsIn, groups.totalIn);
+                pieChart(charts.totalOutByProduct, dimensions.products, groups.productsOut, groups.totalOut);
+
+                charts.transactionsByDay
+                    .width(960)
+                    .height(350)
+                    .margins({top: 20, right: 50, bottom: 20, left: 50})
+                    .dimension(dimensions.days)
+                    .group(dimensions.days.group().reduceCount())
+                    //.keyAccessor(function(d) { return d.key[0]; })
+                    .centerBar(true)
+                    .gap(0)
+                    .x(d3.time.scale().domain([firstDate, lastDate]))
+                    .round(d3.time.days.round)
+                    .xUnits(d3.time.days)
+                    .elasticY(true)
+                    .elasticX(true)
+                    .xAxisPadding(30)
+                    .renderHorizontalGridLines(true)
+                    .renderVerticalGridLines(true)
+
+                barChart(charts.userInByDay, dimensions.days);
+                barChart(charts.userOutByDay, dimensions.days);
+
+                for (var i = 0; i < userIds.length; i++) {
+                    function builder(id) {
+                        return {
+                            upper: dimensions.days.group().reduceSum(function (d) {
+                                if (d.user_id == id) {
+                                    return upperCount(d);
+                                } else {
+                                    return 0;
+                                }
+                            }),
+                            lower: dimensions.days.group().reduceSum(function (d) {
+                                if (d.user_id == id) {
+                                    return lowerCount(d);
+                                } else {
+                                    return 0;
+                                }
+                            })
+                        };
+                    }
+
+                    var result = builder(userIds[i]);
+
+                    if (i == 0) {
+                        charts.userInByDay.group(result.upper);
+                        charts.userOutByDay.group(result.lower);
+                    } else {
+                        charts.userInByDay.stack(result.upper);
+                        charts.userOutByDay.stack(result.lower);
+                    }
+                }
+
+                heatChart(charts.punchCardIn, dimensions.dayOfWeek, dimensions.dayOfWeek.group().reduceSum(upperCount));
+                heatChart(charts.punchCardOut, dimensions.dayOfWeek, dimensions.dayOfWeek.group().reduceSum(lowerCount));
+
+                charts.dataCount
+                    .dimension(data)
+                    .group(data.groupAll());
+
+                $("#link-reset-filters").click(function(e) {
+                    e.preventDefault();
+
+                    dc.filterAll();
+                    dc.redrawAll();
+                });
+
+                dc.renderAll();
+
+                $("#spinner").hide();
+                $("#error").hide();
+                $("#tabs").show();
+                $("#tabs-content").show();
+            });
+        });
+    </script>
+{% endblock head %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Statistics' %}</h1>
+    </div>
+
+    <p>
+        <div class="row">
+            <div class="col-md-8">
+                {% blocktrans %}
+                    This page contains graphs of all transactions registered. Graphs are related and can dynamically be adjusted.
+                    For example, when you select a date range, the other graphs will display data from within this range.
+                {% endblocktrans %}
+            </div>
+            <div class="col-md-4">
+                <div class="btn-toolbar pull-right no-margin">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#modal-range">
+                            {% trans 'Change range' %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p>
+
+    <div class="row text-center" id="spinner">
+        <img src="{{ STATIC_URL }}img/spinner.gif">
+    </div>
+    <div class="row text-center" id="error" style="display: none">
+        <h2>Nothing to show. Change your filters.</h2>
+    </div>
+
+    <ul class="nav nav-tabs" id="tabs" style="display: none">
+        <li class="active">
+            <a href="#tab-1" data-toggle="tab">Transactions</a>
+        </li>
+        <li>
+            <a href="#tab-2" data-toggle="tab">Users</a>
+        </li>
+        <li>
+            <a href="#tab-3" data-toggle="tab">Products</a>
+        </li>
+        <li>
+            <a href="#tab-4" data-toggle="tab">Count</a>
+        </li>
+        <li>
+            <a href="#tab-5" data-toggle="tab">Punch card</a>
+        </li>
+        <li class="pull-right">
+            <p class="navbar-text" id="data-count">
+                <span class="filter-count">0</span> selected out of <span class="total-count">0</span> records |
+                <a href="#" id="link-reset-filters">{% trans 'Reset filters' %}</a>
+            </p>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="tabs-content" style="display:none">
+        <div class="tab-pane active" id="tab-1">
+            <h3>{% trans 'Number of transactions per day' %}</h3>
+
+            <p>
+                {% blocktrans %}
+                    Each transaction individual transaction is counted as one, not it's count.
+                {% endblocktrans %}
+            </p>
+
+            <div class="row">
+                <div id="transactions-by-day"></div>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="tab-2">
+            <h3>{% trans 'Total count per user' %}</h3>
+
+            <p>
+                {% blocktrans %}
+                    Each transaction count is summed per user, grouped by what goes in and what goes out.
+                {% endblocktrans %}
+            </p>
+
+            <div class="row">
+                <div id="total-in-by-user"></div>
+                <h4 class="text-center">{% trans 'In' %}</h4>
+            </div>
+
+            <div class="row">
+                <div id="total-out-by-user"></div>
+                <h4 class="text-center">{% trans 'Out' %}</h4>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="tab-3">
+            <h3>{% trans 'Total count per product' %}</h3>
+
+            <p>
+                {% blocktrans %}
+                    Each transaction count is summed per product, grouped by what goes in and what goes out.
+                {% endblocktrans %}
+            </p>
+
+            <div class="row">
+                <div id="total-in-by-product"></div>
+                <h4 class="text-center">{% trans 'In' %}</h4>
+            </div>
+
+            <div class="row">
+                <div id="total-out-by-product"></div>
+                <h4 class="text-center">{% trans 'Out' %}</h4>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="tab-4">
+            <h3>{% trans 'Count per user per day' %}</h3>
+
+            <p>
+                {% blocktrans %}
+                    Each transaction count is summed per user, grouped by date and what goes in and what goes out.
+                {% endblocktrans %}
+            </p>
+
+            <div class="row">
+                <div id="user-in-by-day"></div>
+                <h4 class="text-center">{% trans 'In' %}</h4>
+            </div>
+
+            <div class="row">
+                <div id="user-out-by-day"></div>
+                <h4 class="text-center">{% trans 'Out' %}</h4>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="tab-5">
+            <h3>{% trans 'Punch card of transactions' %}</h3>
+
+            <p>
+                {% blocktrans %}
+                    Each bubble is the count at a specific moment (day versus hour), grouped by what goes in and what goes out.
+                {% endblocktrans %}
+            </p>
+
+            <div class="row">
+                <div id="punch-card-in"></div>
+                <h4 class="text-center">{% trans 'In' %}</h4>
+            </div>
+
+            <div class="row">
+                <div id="punch-card-out"></div>
+                <h4 class="text-center">{% trans 'Out' %}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-range" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3>{% trans 'Change Range' %}</h3>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Dates are in YYYY-MM-DD format.
+                    </p>
+
+                    {% crispy form_range %}
+                </div>
+                <div class="modal-footer">
+                    <a href="#" data-dismiss="modal" class="btn btn-default">{% trans 'Close' %}</a>
+                    <a href="#" id="button-range-submit" class="btn btn-primary">{% trans 'Apply' %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

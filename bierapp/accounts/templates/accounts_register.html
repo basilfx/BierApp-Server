@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Register account' %}</h1>
+    </div>
+
+    <p>
+        {% blocktrans %}
+            Creating an account is easy and free. After registration, you can access
+            all the features of bierapp. We don't sell your information and your
+            information is stored securly.
+        {% endblocktrans %}
+    </p>
+
+    {% crispy form %}
+{% endblock content %}

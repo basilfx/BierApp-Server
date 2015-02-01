@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'My sites' %}</h1>
+    </div>
+
+    <p>
+        {% trans 'You are a member of the following sites.' %}
+    </p>
+
+    <ul>
+        {% for site in sites %}
+            <li>
+                <a href="{{ site.get_absolute_url }}">{{ site }}</a>
+            </li>
+        {% empty %}
+            <li>
+                {% trans 'No sites available' %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'bierapp.accounts.views.site_create' %}">{% trans 'Add site' %}</a>
+{% endblock content %}

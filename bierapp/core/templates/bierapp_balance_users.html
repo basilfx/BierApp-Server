@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load i18n future %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Balance by user' %}</h1>
+    </div>
+
+    <p>
+        {% blocktrans %}
+            This is a summary of the balances for all members of this site. Click a user to
+            retrieve more information.
+        {% endblocktrans %}
+    </p>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>{% trans 'User' %}</th>
+                <th>{% trans 'Product group' %}</th>
+                <th>{% trans 'In stock' %}</th>
+                <th>{% trans 'Value' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                {% cycle 'odd' 'even' as row_color silent %}
+
+                {% for product_group in user.product_groups %}
+                    {% if forloop.counter == 1 %}
+                        <tr class="{{ row_color }}">
+                            <td rowspan="{{ user.product_groups|length }}">
+                                <a href="{% url 'bierapp.core.views.balance_user' id=user.pk %}">{{ user }}</a>
+                            </td>
+                            <td>{{ product_group }}</td>
+                            <td>{{ product_group.total_count }}</td>
+                            <td>{{ product_group.total_value }}</td>
+                        </tr>
+                    {% else %}
+                        <tr class="{{ row_color }}">
+                            <td>{{ product_group }}</td>
+                            <td>{{ product_group.total_count }}</td>
+                            <td>{{ product_group.total_value }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

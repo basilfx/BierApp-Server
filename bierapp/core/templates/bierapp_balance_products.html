@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load i18n future %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Balance by products' %}</h1>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product group</th>
+                <th>Product</th>
+                <th>Total</th>
+
+                {% for user in users %}
+                    <th>{{ user }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_group, products in result.items %}
+                {% cycle 'odd' 'even' as row_color silent %}
+
+                {% for product, users in products.items %}
+                    {% if forloop.counter == 1 %}
+                        <tr class="{{ row_color }}">
+                            <td rowspan="{{ products|length }}">{{ product_group }}</td>
+                            <td>{{ product }}</td>
+                            <td>{{ product.total_count }}</td>
+
+                            {% for user in users %}
+                                <td>{{ user.total_count }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% else %}
+                        <tr class="{{ row_color }}">
+                            <td>{{ product }}</td>
+                            <td>{{ product.total_count }}</td>
+
+                            {% for user in users %}
+                                <td>{{ user.total_count }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% empty %}
+                <tr>
+                    <td colspan="4">
+                        {% trans 'No product groups to present.' %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

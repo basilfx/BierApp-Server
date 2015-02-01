@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ site }}</h1>
+    </div>
+
+
+    <p>
+        <div class="row">
+            <div class="col-md-8">
+                {% trans 'The following users are a member of this site. An admin can invite new users to this site.' %}
+            </div>
+            <div class="col-md-4">
+                <div class="btn-toolbar pull-right no-margin">
+                    <div class="btn-group">
+                        {% if membership.is_admin %}
+                            <a class="btn btn-success" href="{% url 'bierapp.accounts.views.site_invite' id=site.id %}">
+                                {% trans 'Invite users' %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>{% trans 'User' %}</th>
+                <th>{% trans 'Since' %}</th>
+                <th>{% trans 'Role' %}</th>
+                <th>{% trans 'Actions' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if memberships|length > 0 or membership_invites|length > 0 %}
+                {% for membership in memberships %}
+                    <tr>
+                        <td>{{ membership.user }}</td>
+                        <td>
+                            {{ membership.created|date:"Y-m-d" }}
+                        </td>
+                        <td>
+                            {% if membership.is_hidden %}
+                                {% trans 'Hidden' %}
+                            {% elif membership.is_admin %}
+                                {% trans 'Admin' %}
+                            {% else %}
+                                {% trans 'User' %}
+                            {% endif %}
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                {% for membership_invite in membership_invites %}
+                    <tr>
+                        <td>{{ membership.email }}</td>
+                        <td>
+                            {% trans 'Invited' %}
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">{% trans 'No members or invited members to show' %}</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+{% endblock content %}

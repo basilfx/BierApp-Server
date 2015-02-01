@@ -1,0 +1,50 @@
+{% load i18n estimated_count future %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>{% trans 'Product group' %}</th>
+            <th>{% trans 'Product' %}</th>
+            <th>{% trans 'Total value' %}</th>
+            <th>{% trans 'Total stock' %}</th>
+            <th>{% trans 'Estimated stock' %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product_group in product_groups %}
+            {% cycle 'odd' 'even' as row_color silent %}
+
+            {% for product in product_group.all_products %}
+                {% if forloop.counter == 1 %}
+                    <tr class="{{ row_color }}">
+                        <td rowspan="{{ product_group.all_products|length|add:"1" }}">{{ product_group }}</td>
+                        <td>{{ product }}</td>
+                        <td>{{ product.total_value }}</td>
+                        <td>{{ product.total_count }}</td>
+                        <td>{% estimate_count product_group product %}</td>
+                    </tr>
+                {% else %}
+                    <tr class="{{ row_color }}">
+                        <td>{{ product }}</td>
+                        <td>{{ product.total_value }}</td>
+                        <td>{{ product.total_count }}</td>
+                        <td>{% estimate_count product_group product %}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+
+            <tr class="{{ row_color }}" style="font-style: italic">
+                <td>{% trans 'Total' %}</td>
+                <td>{{ product_group.total_value }}</td>
+                <td>{{ product_group.total_count }}</td>
+                <td>&mdash;</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">
+                    {% trans 'No product groups to present.' %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

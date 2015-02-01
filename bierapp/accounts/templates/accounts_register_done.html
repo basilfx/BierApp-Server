@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Registration completed' %}</h1>
+    </div>
+
+    <p>
+        {% url 'bierapp.accounts.views.index' as profile_url %}
+
+        {% blocktrans %}
+            Your account is created. Click <a href="{{profile_url}}">here</a> to go to your profile page! Be sure to create a site, or inform others to invite you!
+        {% endblocktrans %}
+    </p>
+{% endblock content %}

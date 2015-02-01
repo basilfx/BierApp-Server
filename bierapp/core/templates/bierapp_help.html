@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Help' %}</h1>
+    </div>
+
+    <h3>{% trans 'What is a product group?' %}</h3>
+
+    <p>
+        {% blocktrans %}
+            A product group is a collection containing products which are considered equal. For example,
+            you could have a category with beers that are considered equal. Products in this category
+            are interchangable, meaning one could buy 8 items worth 1, or 4 items worth 2. Products 
+            between two categories are not interchangable, but you could interchange among each other.
+        {% endblocktrans %}
+    </p>
+
+    <h3>{% trans 'What is a template?' %}</h3>
+
+    <p>
+        {% blocktrans %}
+            A template is a blueprint for returning transactions, just to provide a way to commit 
+            frequent transactions.
+        {% endblocktrans %}
+    </p>
+
+    <h3>{% trans 'What is the difference between value, count and estimated count?' %}</h3>
+
+    <p>
+        {% blocktrans %}
+            The value is what a certain product in a certain product group is worth.
+            Consider it as credits. The count is the current amount of items
+            available. If you would count the real world inventory, these numbers
+            should match. The estimated stock is what is estimated to be available
+            based on the total product group value and the price per product.
+            Note that products in one product group are equal.
+        {% endblocktrans %}
+    </p>
+
+    <h3>{% trans 'Why can I not add new products or groups?' %}</h3>
+
+    <p>
+        {% blocktrans %}
+            You are probably not a site administrator.
+        {% endblocktrans %}
+    </p>
+{% endblock content %}

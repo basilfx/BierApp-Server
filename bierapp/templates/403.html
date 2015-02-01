@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="alert alert-error">
+        {% blocktrans %}
+            Permission denied to the request page.
+        {% endblocktrans %}
+    </div>
+{% endblock content %}

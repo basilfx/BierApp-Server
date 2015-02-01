@@ -1,0 +1,39 @@
+{% extends 'base_landing.html' %}
+{% load i18n crispy_forms_tags %}
+
+{% block head %}{% endblock head %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-offset-3 panel">
+                <h1 class="margin-base-vertical">
+                    {% trans 'Dinner is ready!' %}
+                </h1>
+
+                <p>
+                    {% blocktrans %}
+                        BierApp is a drink management platform for student houses. Management, statistics and more with a few easy clicks.
+                    {% endblocktrans %}
+                </p>
+
+                <p>
+                    {% blocktrans %}
+                        Login, or create a new account. For free.
+                    {% endblocktrans %}
+                </p>
+
+                {% crispy form %}
+
+                <ul class="list-unstyled">
+                    <li>
+                        <a href="{% url 'bierapp.accounts.views.register' %}">Register new account</a>
+                    </li>
+                    <li>
+                        <a href="#">Forgot password</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

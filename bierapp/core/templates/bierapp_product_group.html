@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Product group' %}</h1>
+    </div>
+
+    <p>
+        <div class="row">
+            <div class="col-md-8">
+
+            </div>
+            <div class="col-md-4">
+                <div class="btn-toolbar pull-right no-margin">
+                    <div class="btn-group">
+                        {% if request.membership.is_admin %}
+                            <a class="btn btn-success" href="{% url 'bierapp.core.views.product_group_product_create' id=product_group.pk %}">
+                                {% trans 'Add product' %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Value</th>
+                <th>Visible in App</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td><a href="{{ product.get_absolute_url }}">{{ product.title }}</a></td>
+                    <td>{{ product.value }}</td>
+                    <td>{{ product.is_app_visible|yesno:"Yes,No" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">
+                        {% trans 'No products to show' %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% include 'paginator.html' with objects=products %}
+{% endblock content %}

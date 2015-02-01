@@ -1,0 +1,53 @@
+{% load i18n %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2" style="vertical-align: top">#</th>
+            <th colspan="2">Description</th>
+            <th colspan="2">Date</th>
+            <th colspan="2">Time</th>
+        </tr>
+        <tr style="font-style: italic">
+            <th>Product</th>
+            <th>Group</th>
+            <th>Count</th>
+            <th>Value</th>
+            <th colspan="2">User</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+            {% cycle 'odd' 'even' as row_color silent %}
+
+            <tr class="{{ row_color }}">
+                <td style="font-weight: bold" rowspan="{{ transaction.transaction_items.all|length|add:"1" }}">{{ transaction.id }}</td>
+                <td style="font-weight: bold" colspan="2">{{ transaction.description }}</td>
+                <td colspan="2">{{ transaction.date_created|date:"Y-m-d" }}</td>
+                <td colspan="2">{{ transaction.date_created|date:"H:i" }}</td>
+            </tr>
+
+            {% for transaction_item in transaction.transaction_items.all %}
+                <tr class="{{ row_color }}">
+                    <td>{{ transaction_item.product }}</td>
+                    <td>{{ transaction_item.product_group }}</td>
+                    <td>{{ transaction_item.count }}</td>
+                    <td>{{ transaction_item.value }}</td>
+
+                    {% if transaction_item.accounted_user != transaction_item.executing_user  %}
+                        <td>{{ transaction_item.executing_user }}</td>
+                        <td>{{ transaction_item.accounted_user }}</td>
+                    {% else %}
+                        <td colspan="2">{{ transaction_item.accounted_user }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% empty %}
+            <tr>
+                <td colspan="7">
+                    {% trans 'No transactions to show.' %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

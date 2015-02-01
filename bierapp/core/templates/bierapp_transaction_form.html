@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'New transaction' %}</h1>
+    </div>
+
+    <form method="post">
+        {% crispy form %}
+
+        <h2>{% trans 'Products' %}</h2>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{% trans 'Product' %}</th>
+                    <th>{% trans 'Count' %}</th>
+                    <th>{% trans 'Actions' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% crispy formset formset.form.helper %}
+            </tbody>
+        </table>
+
+        {% crispy dummy_form %}
+    </form>
+{% endblock content %}

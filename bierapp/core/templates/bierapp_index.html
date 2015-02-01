@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Overview' %}</h1>
+    </div>
+
+    <h2>{% trans 'Quick transactions' %}</h2>
+
+    <p>
+        {% blocktrans %}
+            You can quickly execute a transaction by selecting a template and click execute.
+        {% endblocktrans %}
+    </p>
+
+    {% crispy pick_template_form %}
+
+    <h2>{% trans 'Last 5 transactions' %}</h2>
+
+    <p>
+        {% blocktrans %}
+            The last five transactions are all transactions involving your account.
+        {% endblocktrans %}
+    </p>
+
+    {% include 'includes/bierapp_transaction_table.html' %}
+
+    <a href="{% url 'bierapp.core.views.transactions' %}">{% trans 'View all transactions' %}</a>
+
+    <h2>{% trans 'Current balance' %}</h2>
+
+    <p>
+        {% blocktrans %}
+            The overview below is the actual status of your balance.
+        {% endblocktrans %}
+    </p>
+
+    {% include 'includes/bierapp_balance_table.html' %}
+
+    <a href="{% url 'bierapp.core.views.balance_users' %}">{% trans 'View all balances' %}</a>
+{% endblock content %}

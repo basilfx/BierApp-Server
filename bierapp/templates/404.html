@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="alert alert-error">
+        {% blocktrans %}
+            Not able to find the page you have requested for.
+        {% endblocktrans %}
+    </div>
+{% endblock content %}

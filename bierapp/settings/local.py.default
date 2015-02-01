@@ -1,0 +1,67 @@
+from . import *
+
+# Default settings
+DEBUG = True
+DEBUG_TEMPLATES = True
+DEBUG_TOOLBAR = True
+DEBUG_IN_TEMPLATES = True
+
+# Make this unique, and don"t share it with anybody.
+SECRET_KEY = None
+
+# Celery settings
+BROKER_URL = "amqp://guest:guest@localhost//"
+
+# Database settings
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "bierapp",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": ""
+    }
+}
+
+# Make sure the 'debug' variable is available for templates. It automatically
+# depends on the DEBUG value.
+if DEBUG_IN_TEMPLATES:
+    def context_debug(request):
+        return {
+            "DEBUG": DEBUG,
+            "DEBUG_TEMPLATES": TEMPLATE_DEBUG
+        }
+
+    TEMPLATE_CONTEXT_PROCESSORS = \
+        TEMPLATE_CONTEXT_PROCESSORS + ("bierapp.settings.local.context_debug",)
+
+# Load Debug Toolbar and configure default panels.
+if DEBUG_TOOLBAR:
+    def custom_show_toolbar(request):
+        return True
+
+    # Volgorde is van belang
+    INSTALLED_APPS  = INSTALLED_APPS + ("debug_toolbar", )
+    MIDDLEWARE_CLASSES = \
+        ("debug_toolbar.middleware.DebugToolbarMiddleware",) + \
+        MIDDLEWARE_CLASSES
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": custom_show_toolbar,
+        "INTERCEPT_REDIRECTS": False,
+    }
+
+    DEBUG_TOOLBAR_PANELS = (
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.logging.LoggingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+    )

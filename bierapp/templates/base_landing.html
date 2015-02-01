@@ -1,0 +1,73 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+    <head>
+        <meta charset="utf-8">
+        <title>BierApp</title>
+
+        <meta name="description" content="BierApp, consumptieregistratie voor studentenhuizen.">
+        <meta name="author" content="Bas Stottelaar">
+
+        <!-- Fonts -->
+        <link href="http://fonts.googleapis.com/css?family=Abel|Open+Sans:400,600" rel="stylesheet" />
+
+        {% if UNCOMPILED_RESOURCES %}
+            <!-- Less -->
+            <link rel="stylesheet/less" href="{% static 'bootstrap/less/bootstrap.less' %}">
+            <script type="text/javascript" src="{% static 'less.js/dist/less-1.5.1.js' %}"></script>
+        {% else %}
+            <!-- CSS -->
+            <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
+            <link rel="stylesheet" href="{% static 'css/default.css' %}">
+        {% endif %}
+
+        <!-- jQuery -->
+        {% if UNCOMPILED_RESOURCES %}
+            <script type="text/javascript" src="{% static 'jquery/jquery.js' %}"></script>
+        {% else %}
+            <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
+        {% endif %}
+
+        <style>
+            html {
+                background: url({% static 'img/landing_bg1.jpg' %}) no-repeat center center fixed;
+                -webkit-background-size: cover;
+                -moz-background-size: cover;
+                -o-background-size: cover;
+                background-size: cover;
+            }
+
+            body {
+                padding-top: 20px;
+                font-size: 16px;
+                font-family: "Open Sans", serif;
+                background: transparent;
+            }
+
+            h1 {
+                font-family: "Abel", Arial, sans-serif;
+                font-weight: 400;
+                font-size: 40px;
+            }
+
+            /* Override B3 .panel adding a subtly transparent background */
+            .panel {
+                background-color: rgba(255, 255, 255, 0.9);
+            }
+
+            .margin-base-vertical {
+                margin: 40px 0;
+            }
+        </style>
+    </head>
+    <body>
+        {% block content %}{% endblock content %}
+
+        {% if UNCOMPILED_RESOURCES %}
+            <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
+        {% else %}
+            <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+        {% endif %}
+    </body>
+</html>

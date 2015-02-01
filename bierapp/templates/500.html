@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="alert alert-error">
+        {% blocktrans %}
+            Internal server error.
+        {% endblocktrans %}
+    </div>
+{% endblock content %}

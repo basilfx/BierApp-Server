@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% trans 'Invite user' %}</h1>
+    </div>
+
+    {% if invite %}
+        <div class="alert alert-info">
+            {% trans 'User has been invited. He or she will receive an email to confirm membership.' %}
+
+            <a href="{% url 'bierapp.accounts.views.site_invite_activate' id=invite.site.id %}?token={{ invite.token }}&email={{ invite.email }}">HACK TO ACTIVATE</a>
+        </div>
+    {% endif %}
+
+    <p>
+        {% blocktrans with name=membership.site %}
+            Enter email address of the user to invite for {{ name }} and click submit.
+        {% endblocktrans %}
+    </p>
+
+    {% crispy form %}
+{% endblock content %}

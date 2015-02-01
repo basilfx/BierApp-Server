@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ product }}</h1>
+    </div>
+
+    {% if request.membership.is_admin %}
+        <a href="">{% trans 'Edit product' %}</a>
+    {% endif %}
+{% endblock content %}

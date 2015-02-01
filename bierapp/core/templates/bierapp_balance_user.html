@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>
+            {% blocktrans with user=user%}
+                Balance of {{ user }}
+            {% endblocktrans %}
+        </h1>
+    </div>
+
+    {% include 'includes/bierapp_balance_table.html' %}
+{% endblock content %}
