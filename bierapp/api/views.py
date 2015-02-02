@@ -12,16 +12,17 @@ from bierapp.core.filters import TransactionFilter, RangeFilter
 from bierapp.core.models import Product, Transaction, TransactionItem, XPTransaction
 from bierapp.api.serializers import ProductSerializer, TransactionSerializer, UserSerializer, UserInfoSerializer
 
+
 class ApiIndex(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         return Response({
             "name": request.site.name,
-            "users": reverse("bierapp.core.api.users", request=request),
-            "products": reverse("bierapp.core.api.products", request=request),
-            "transactions": reverse("bierapp.core.api.transactions", request=request),
-            "stats": reverse("bierapp.core.api.stats", request=request)
+            "users": reverse("bierapp.api.views.users", request=request),
+            "products": reverse("bierapp.api.views.products", request=request),
+            "transactions": reverse("bierapp.api.views.transactions", request=request),
+            "stats": reverse("bierapp.api.views.stats", request=request)
         })
 
 
@@ -84,7 +85,8 @@ class UserInfoList(generics.ListAPIView):
 
         rows_a = TransactionItem \
             .objects \
-            .values("accounted_user", "product", "product__value",
+            .values(
+                "accounted_user", "product", "product__value",
                 "product_group") \
             .annotate(count=Sum("count")) \
             .annotate(value=Sum("value")) \
@@ -97,7 +99,8 @@ class UserInfoList(generics.ListAPIView):
             .values("accounted_user", "product_group") \
             .annotate(total_count=Sum("count")) \
             .annotate(total_value=Sum("value")) \
-            .filter(transaction__site=site,
+            .filter(
+                transaction__site=site,
                 accounted_user__in=objects.values_list("id")) \
             .order_by("accounted_user")
 

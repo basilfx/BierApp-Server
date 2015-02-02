@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('logo', models.ImageField(height_field=b'logo_height', width_field=b'logo_width', null=True, upload_to=b'apps/bierapp/logos/')),
                 ('logo_height', models.PositiveIntegerField(null=True)),
                 ('logo_width', models.PositiveIntegerField(null=True)),
-                ('date_changed', models.DateTimeField(auto_now=True, null=True)),
+                ('modified', models.DateTimeField(auto_now=True, null=True)),
             ],
             options={
             },
@@ -46,11 +46,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('description', models.CharField(default=None, max_length=255, null=True)),
-                ('date_created', models.DateTimeField(auto_now_add=True, null=True)),
+                ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('site', models.ForeignKey(related_name='transactions', to='accounts.Site')),
             ],
             options={
-                'ordering': ('-date_created',),
+                'ordering': ('-created',),
             },
             bases=(models.Model,),
         ),
@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('value', models.IntegerField()),
                 ('description', models.TextField()),
-                ('date_created', models.DateTimeField(auto_now_add=True, null=True)),
+                ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('parent', models.ForeignKey(to='core.XPTransaction', null=True)),
                 ('site', models.ForeignKey(related_name='xp_transactions', to='accounts.Site')),
                 ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),

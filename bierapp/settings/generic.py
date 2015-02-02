@@ -103,6 +103,7 @@ BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "bierapp/static/")
 
 BOWER_INSTALLED_APPS = (
     "bootstrap",
+    "bootstrap-notify",
     "dcjs#master",
     "less.js",
     "jquery"

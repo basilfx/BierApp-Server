@@ -1,14 +1,14 @@
 from django.db import models
-
 from django.core.urlresolvers import reverse
 
 from bierapp.core.managers import ApiManager
 from bierapp.accounts.models import User, Site
 
+from django_extensions.db.models import TimeStampedModel
+
 
 class ProductGroup(models.Model):
     site = models.ForeignKey(Site, related_name="product_groups")
-    # value = models.DecimalField(max_digits=10, decimal_places=2)
     title = models.CharField(max_length=255)
 
     is_app_visible = models.BooleanField(default=True)
@@ -72,7 +72,7 @@ class TransactionTemplateItem(models.Model):
     count = models.IntegerField(null=False, default=0)
 
 
-class Product(models.Model):
+class Product(TimeStampedModel, models.Model):
     title = models.CharField(max_length=255)
     value = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -84,8 +84,6 @@ class Product(models.Model):
         upload_to="apps/bierapp/logos/", null=True)
     logo_height = models.PositiveIntegerField(null=True)
     logo_width = models.PositiveIntegerField(null=True)
-
-    date_changed = models.DateTimeField(null=True, auto_now=True)
 
     objects = models.Manager()
     api_objects = ApiManager()
@@ -99,14 +97,12 @@ class Product(models.Model):
             kwargs={"group_id": self.product_group.pk, "id": self.pk})
 
 
-class Transaction(models.Model):
+class Transaction(TimeStampedModel, models.Model):
     site = models.ForeignKey(Site, related_name="transactions")
     description = models.CharField(max_length=255, default=None, null=True)
 
-    date_created = models.DateTimeField(null=True, auto_now_add=True)
-
     class Meta:
-        ordering = ("-date_created", )
+        ordering = ("-created", )
 
 
 class TransactionItem(models.Model):
@@ -122,7 +118,7 @@ class TransactionItem(models.Model):
     executing_user = models.ForeignKey(User, related_name="+")
 
 
-class XPTransaction(models.Model):
+class XPTransaction(TimeStampedModel, models.Model):
     site = models.ForeignKey("accounts.Site", related_name="xp_transactions")
     user = models.ForeignKey("accounts.User")
 
@@ -131,4 +127,5 @@ class XPTransaction(models.Model):
     value = models.IntegerField()
     description = models.TextField()
 
-    date_created = models.DateTimeField(null=True, auto_now_add=True)
+    class Meta:
+        ordering = ("-created", )

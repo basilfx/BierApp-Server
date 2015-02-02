@@ -11,7 +11,6 @@ class ProductGroupFormHelper(FormHelper):
     def layout(self):
         return Layout(
             Field('title'),
-            Field('value'),
             Field('is_app_visible'),
 
             FormActions(

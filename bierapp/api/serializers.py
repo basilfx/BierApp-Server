@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from bierapp.accounts.models import User, Site
+from bierapp.accounts.models import User, Site, UserMembership, \
+    ROLE_ADMIN, ROLE_MEMBER
 from bierapp.core.models import Product, Transaction, TransactionItem
 
 import math
@@ -63,17 +64,23 @@ class UserInfoSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.Field()
-    avatar = serializers.SerializerMethodField("get_avatar")
+    role = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             "id", "first_name", "last_name", "avatar", "avatar_height",
-            "avatar_width", "role", "date_changed")
+            "avatar_width", "role", "modified")
 
     def get_avatar(self, user):
         request = self.context["request"]
 
         if user.avatar:
             return request.build_absolute_uri(user.avatar.url)
+
+    def get_role(self, user):
+        request = self.context["request"]
+
+        return user.id in UserMembership.objects.filter(
+            site=request.site, role__in=[ROLE_ADMIN, ROLE_MEMBER]).values_list("user_id", flat=True)

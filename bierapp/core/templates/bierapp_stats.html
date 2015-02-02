@@ -68,17 +68,17 @@
                 }
 
                 data.forEach(function (e) {
-                    e.date = dateFormat.parse(e.date);
-                    e.day = d3.time.day(e.date);
-                    e.hour = d3.time.hour(e.date);
+                    e.created = dateFormat.parse(e.created);
+                    e.day = d3.time.day(e.created);
+                    e.hour = d3.time.hour(e.created);
 
                     if (userIds.indexOf(e.user_id) == -1) {
                         userIds.push(e.user_id);
                     }
                 });
 
-                var firstDate = d3.min(data, function(d) { return d.date });
-                var lastDate =  d3.max(data, function(d) { return d.date });
+                var firstDate = d3.min(data, function(d) { return d.created });
+                var lastDate =  d3.max(data, function(d) { return d.created });
 
                 var data = window.data = crossfilter(data);
 
@@ -86,7 +86,7 @@
                     days: data.dimension(function(d) { return d.day }),
                     users: data.dimension(function(d) { return d.user }),
                     products: data.dimension(function(d) { return d.product }),
-                    dayOfWeek: data.dimension(function(d) { return [+d.date.getDay(), +d.date.getHours()] })
+                    dayOfWeek: data.dimension(function(d) { return [+d.created.getDay(), +d.created.getHours()] })
                 };
 
                 var groups = {

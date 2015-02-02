@@ -20,7 +20,6 @@ urlpatterns = patterns(
     (r"sites/create/$", "bierapp.accounts.views.site_create"),
     (r"sites/(?P<id>\d+)/$", "bierapp.accounts.views.site"),
     (r"sites/(?P<id>\d+)/switch/$", "bierapp.accounts.views.site_switch"),
-    (r"sites/(?P<id>\d+)/invite/done/$", "bierapp.accounts.views.site_invite_done"),
     (r"sites/(?P<id>\d+)/invite/$", "bierapp.accounts.views.site_invite"),
 
     # Authentication

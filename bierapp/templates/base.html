@@ -188,8 +188,10 @@
                     <script type="text/javascript">
                         {% for message in messages %}
                             $(document).ready(function() {
-                                $('.notifications.center.top').notify({
-                                    message: { text: '{{ message }}' },
+                                $(".notifications.center.top").notify({
+                                    message: {
+                                        text: "{{ message }}"
+                                    },
                                 }).show();
                             });
                         {% endfor %}
@@ -205,6 +207,8 @@
         {% else %}
             <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
         {% endif %}
+
+        <script type="text/javascript" src="{% static 'bootstrap-notify/js/bootstrap-notify.js' %}"></script>
 
         {% if not DEBUG %}
     		<script type="text/javascript">

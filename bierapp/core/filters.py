@@ -1,4 +1,5 @@
-from bierapp.accounts.models import User
+from bierapp.accounts.models import User, UserMembership, \
+    ROLE_ADMIN, ROLE_MEMBER
 from bierapp.core.models import Transaction, Product
 from bierapp.core.helpers import TransactionFilterHelper, RangeFilterHelper
 from bierapp.utils.filters import GroupedModelChoiceFilter
@@ -9,11 +10,11 @@ import django_filters as filters
 class TransactionFilter(filters.FilterSet):
     product = GroupedModelChoiceFilter(queryset=Product.objects, group_by_field="product_group", name="transaction_items__product")
 
-    accounted_user = filters.ModelChoiceFilter(queryset=User.objects, name="transaction_items__accounted_user")
-    executing_user = GroupedModelChoiceFilter(queryset=User.objects.order_by("user_type"), group_by_field="user_type", group_label={0: "Inhabitants", 1: "Guests"}, name="transaction_items__executing_user")
+    accounted_user = filters.ModelChoiceFilter(name="transaction_items__accounted_user")
+    executing_user = GroupedModelChoiceFilter(group_by_field="role", group_label={1: "Admins", 2: "Members", 3: "Guests"}, name="transaction_items__executing_user")
 
-    before = filters.DateFilter(name="date_created", lookup_type="lte")
-    after = filters.DateFilter(name="date_created", lookup_type="gte")
+    before = filters.DateFilter(name="created", lookup_type="lte")
+    after = filters.DateFilter(name="created", lookup_type="gte")
 
     description = filters.CharFilter(name="description", lookup_type="icontains")
 
@@ -24,8 +25,8 @@ class TransactionFilter(filters.FilterSet):
     def __init__(self, site, *args, **kwargs):
         super(TransactionFilter, self).__init__(*args, **kwargs)
 
-        self.filters["accounted_user"].extra["queryset"] = site.users
-        self.filters["executing_user"].extra["queryset"] = site.users
+        self.filters["accounted_user"].extra["queryset"] = UserMembership.objects.filter(site=site, role__in=[ROLE_ADMIN, ROLE_MEMBER])
+        self.filters["executing_user"].extra["queryset"] = UserMembership.objects.filter(site=site)
         self.filters["product"].extra["queryset"] = Product.objects.filter(product_group__in=site.product_groups.all())
 
     @property
@@ -36,8 +37,8 @@ class TransactionFilter(filters.FilterSet):
 
 
 class RangeFilter(filters.FilterSet):
-    before = filters.DateTimeFilter(name="date_created", lookup_type="lte")
-    after = filters.DateTimeFilter(name="date_created", lookup_type="gte")
+    before = filters.DateTimeFilter(name="created", lookup_type="lte")
+    after = filters.DateTimeFilter(name="created", lookup_type="gte")
 
     description = filters.CharFilter(
         name="description", lookup_type="icontains")

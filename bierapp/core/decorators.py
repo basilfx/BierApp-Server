@@ -13,7 +13,7 @@ def resolve_user(func):
     @wraps(func)
     def _inner(request, id, *args, **kwargs):
         try:
-            user = request.site.members.get(id=id)
+            user = request.site.users.get(id=id)
         except User.DoesNotExist:
             raise Http404
 

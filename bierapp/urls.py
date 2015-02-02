@@ -5,7 +5,7 @@ from django.contrib import admin
 api_v1_patterns = patterns(
     "",
 
-    url(r"^api/", include("bierapp.api.urls_api_v1")),
+    url(r"", include("bierapp.api.urls_api_v1")),
 )
 
 urlpatterns = patterns(

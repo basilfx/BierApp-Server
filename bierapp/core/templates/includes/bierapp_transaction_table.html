@@ -23,8 +23,8 @@
             <tr class="{{ row_color }}">
                 <td style="font-weight: bold" rowspan="{{ transaction.transaction_items.all|length|add:"1" }}">{{ transaction.id }}</td>
                 <td style="font-weight: bold" colspan="2">{{ transaction.description }}</td>
-                <td colspan="2">{{ transaction.date_created|date:"Y-m-d" }}</td>
-                <td colspan="2">{{ transaction.date_created|date:"H:i" }}</td>
+                <td colspan="2">{{ transaction.created|date:"Y-m-d" }}</td>
+                <td colspan="2">{{ transaction.created|date:"H:i" }}</td>
             </tr>
 
             {% for transaction_item in transaction.transaction_items.all %}

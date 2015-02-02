@@ -5,6 +5,7 @@ from django.forms.models import inlineformset_factory
 from django.http import StreamingHttpResponse
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_page
+from django.utils.translation import ugettext_lazy as _
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,7 +15,7 @@ from datetime import datetime
 from bierapp.utils.decorators import json_response
 from bierapp.utils.views import paginate
 
-from bierapp.accounts.models import User
+from bierapp.accounts.models import User, UserMembership
 from bierapp.core.filters import TransactionFilter, RangeFilter
 from bierapp.core.forms import ProductGroupForm, ProductForm, TransactionForm, \
     InlineTransactionItemForm, DummyForm, ExportForm, PickTemplateForm
@@ -41,7 +42,7 @@ def index(request):
                 "transaction_items__executing_user", "transaction_items__product",
                 "transaction_items__product_group") \
             .filter(transaction_items__accounted_user=request.user) \
-            .order_by("-date_created") \
+            .order_by("-created") \
             .distinct()[:5]
 
         # Current balance
@@ -61,7 +62,7 @@ def help(request):
 
 @login_required
 def balance_users(request):
-    users = request.site.members.all()
+    users = request.site.users.all()
 
     for user in users:
         user.product_groups = list(ProductGroup.objects.filter(site=request.site, transactionitem__accounted_user=user).annotate(total_count=Sum("transactionitem__count"), total_value=Sum("transactionitem__value")))
@@ -79,9 +80,12 @@ def balance_user(request, user):
 
     return render(request, "bierapp_balance_user.html", locals())
 
+
 @login_required
 def balance_products(request):
-    user_ids = [str(x.pk) for x in request.site.members.all()]
+    user_ids = [str(x.user.pk) for x in UserMembership.objects.filter(site=request.site).order_by("-role")]
+    product_group_ids = [str(x.pk) for x in ProductGroup.objects.filter(site=request.site)]
+
     rows = User.objects.raw(
         """
         SELECT u.*, IFNULL(total_value, 0) AS total_value, IFNULL(total_count, 0) AS total_count, p.id AS product_id, p.product_group_id AS product_group_id
@@ -93,8 +97,8 @@ def balance_products(request):
            WHERE x.transaction_id = y.id AND y.site_id = %d AND x.accounted_user_id IN (%s)
            GROUP BY accounted_user_id, product_id
         ) t ON u.id=t.accounted_user_id AND p.id=t.product_id
-        WHERE u.id IN (%s)
-        ORDER BY u.id""" % (request.site.pk, ",".join(user_ids), ",".join(user_ids)))
+        WHERE u.id IN (%s) AND p.product_group_id IN (%s)
+        ORDER BY u.id""" % (request.site.pk, ",".join(user_ids), ",".join(user_ids), ",".join(product_group_ids)))
 
     product_groups = dict((x.pk, x) for x in ProductGroup.objects.filter(pk__in=[ y.product_group_id for y in rows ]))
     products = dict((x.pk, x) for x in Product.objects.filter(pk__in=[ y.product_id for y in rows ]))
@@ -183,7 +187,7 @@ def transactions_export(request):
             for transaction_item in transaction_items.iterator():
                 yield _inner_to_csv([
                     transaction_item.transaction_id,
-                    transaction_item.transaction.date_created,
+                    transaction_item.transaction.created,
                     transaction_item.product,
                     transaction_item.product.value,
                     transaction_item.count,
@@ -275,7 +279,7 @@ def product_group_create(request):
         product_group.save()
 
         # Post message
-        messages.success(request, "Product group added.")
+        messages.success(request, _("Product group added."))
 
         return redirect(product_group.get_absolute_url())
 
@@ -302,7 +306,7 @@ def product_group_product_create(request, product_group):
         product.save()
 
         # Post message
-        messages.success(request, "Product added.")
+        messages.success(request, _("Product added."))
 
         return redirect(product.get_absolute_url())
 
@@ -340,17 +344,15 @@ def stats_transaction_items(request):
         .filter(transaction__in=transactions) \
         .prefetch_related("product_group", "executing_user", "product")
 
-    return [
-        {
+    return [{
             "transaction_id": transaction_item.transaction.pk,
-            "date": str(transaction_item.transaction.date_created),
+            "created": unicode(transaction_item.transaction.created),
             "product_id": transaction_item.product.pk,
-            "product": str(transaction_item.product),
+            "product": unicode(transaction_item.product),
             "product_group_id": transaction_item.product_group.pk,
-            "product_group": str(transaction_item.product_group),
+            "product_group": unicode(transaction_item.product_group),
             "count": transaction_item.count,
             "value": transaction_item.value,
             "user_id": transaction_item.executing_user.pk,
-            "user": str(transaction_item.executing_user),
-        } for transaction_item in queryset
-    ]
+            "user": unicode(transaction_item.executing_user),
+        } for transaction_item in queryset]

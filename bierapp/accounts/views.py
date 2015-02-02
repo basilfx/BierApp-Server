@@ -138,8 +138,13 @@ def site_invite(request, membership):
         if email_user:
             pass  # TODO
 
-        return redirect(
-            "bierapp.accounts.views.site_invite_done", id=membership.site.id)
+        # Set success message
+        messages.success(request, _(
+            "User has been invited. He or she will receive an email to "
+            "confirm membership. If the user does not have an account yet, "
+            "he or she should register first."))
+
+        return redirect("bierapp.accounts.views.site", id=membership.site.id)
     return render(request, "accounts_site_invite.html", locals())
 
 

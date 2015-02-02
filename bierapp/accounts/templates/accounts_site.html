@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="page-header">
-        <h1>{{ site }}</h1>
+        <h1>{% trans 'Site' %}: {{ site }}</h1>
     </div>
 
     {% if membership.is_member %}

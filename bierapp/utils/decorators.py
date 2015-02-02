@@ -1,9 +1,7 @@
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.core.exceptions import PermissionDenied
 
 from functools import wraps
-
-from bierapp.utils.http import HttpJSONResponse
 
 
 def api_login_required(func):
@@ -35,5 +33,5 @@ def require_ajax(func):
 def json_response(func):
     @wraps(func)
     def _inner(request, *args, **kwargs):
-        return HttpJSONResponse(func(request, *args, **kwargs))
+        return JsonResponse(func(request, *args, **kwargs), safe=False)
     return _inner
