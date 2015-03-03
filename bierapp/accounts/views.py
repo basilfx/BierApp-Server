@@ -72,10 +72,14 @@ def site(request, membership):
     is_admin = membership.is_admin
 
     if request.membership.is_admin:
-        memberships = site.memberships.all().order_by("is_hidden")
+        memberships = site.memberships \
+                          .order_by("is_hidden", "role") \
+                          .prefetch_related("user")
     else:
-        memberships = site.memberships.filter(
-            is_hidden=False).order_by("is_hidden")
+        memberships = site.memberships\
+                          .filter(is_hidden=False) \
+                          .order_by("is_hidden", "role") \
+                          .prefetch_related("user")
 
     membership_invites = site.membership_invites.all()
 

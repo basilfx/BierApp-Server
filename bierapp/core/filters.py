@@ -25,9 +25,9 @@ class TransactionFilter(filters.FilterSet):
     def __init__(self, site, *args, **kwargs):
         super(TransactionFilter, self).__init__(*args, **kwargs)
 
-        self.filters["accounted_user"].extra["queryset"] = UserMembership.objects.filter(site=site, role__in=[ROLE_ADMIN, ROLE_MEMBER])
-        self.filters["executing_user"].extra["queryset"] = UserMembership.objects.filter(site=site)
-        self.filters["product"].extra["queryset"] = Product.objects.filter(product_group__in=site.product_groups.all())
+        self.filters["accounted_user"].extra["queryset"] = UserMembership.objects.filter(site=site, role__in=[ROLE_ADMIN, ROLE_MEMBER]).prefetch_related("user", "site")
+        self.filters["executing_user"].extra["queryset"] = UserMembership.objects.filter(site=site).prefetch_related("user", "site")
+        self.filters["product"].extra["queryset"] = Product.objects.filter(product_group__in=site.product_groups.all()).prefetch_related("product_group")
 
     @property
     def form(self):
