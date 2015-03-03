@@ -157,4 +157,5 @@ class Site(TimeStampedModel, models.Model):
         return unicode(self.name)
 
     def get_absolute_url(self):
-        return reverse("bierapp.accounts.views.site", kwargs={"site_id": self.id})
+        return reverse(
+            "bierapp.accounts.views.site", kwargs={"site_id": self.id})

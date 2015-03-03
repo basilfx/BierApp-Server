@@ -60,7 +60,16 @@ def sites(request):
 @login_required
 @resolve_membership
 def site(request, membership):
+    """
+    Show the site's information page.
+
+    Note that `request.membership` can be different from `membership`. To
+    prevent name clashes, `is_admin` is `True` if the current user is an admin
+    of the requested site.
+    """
+
     site = membership.site
+    is_admin = membership.is_admin
 
     if request.membership.is_admin:
         memberships = site.memberships.all().order_by("is_hidden")
