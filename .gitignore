@@ -7,8 +7,8 @@
 # Ignore repository file
 bierapp/conf/local.py
 bierapp/static/bower_components
-static/
-media/
+/static/
+/media/
 
 # Celery
 celerybeat-schedule
