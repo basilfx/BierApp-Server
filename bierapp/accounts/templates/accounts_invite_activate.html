@@ -14,7 +14,7 @@
                 {% endblocktrans %}
             </div>
 
-            <a href="{% url 'bierapp.accounts.views.site' id=invite.site.id as url %}">Go to site</a>
+            <a href="{% url 'bierapp.accounts.views.site' site_id=invite.site.id as url %}">Go to site</a>
         {% else %}
             <div class="alert alert-info">
                 {% blocktrans with name=invite.site %}

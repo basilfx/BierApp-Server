@@ -14,9 +14,9 @@ def resolve_membership(func):
     """
 
     @wraps(func)
-    def _inner(request, id, *args, **kwargs):
+    def _inner(request, site_id, *args, **kwargs):
         membership = get_object_or_404(
-            UserMembership, site=id, user=request.user)
+            UserMembership, site=site_id, user=request.user)
         return func(request, membership, *args, **kwargs)
     return _inner
 
@@ -28,8 +28,8 @@ def resolve_site(func):
     """
 
     @wraps(func)
-    def _inner(request, id, *args, **kwargs):
-        site = get_object_or_404(Site, id=id)
+    def _inner(request, site_id, *args, **kwargs):
+        site = get_object_or_404(Site, id=site_id)
         return func(request, site, *args, **kwargs)
     return _inner
 

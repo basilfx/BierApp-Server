@@ -39,7 +39,7 @@
                     </td>
                     <td>{{ membership.created|date:"Y-m-d H:i" }}</td>
                     <td>
-                        <a class="btn btn-primary" href="{% url 'bierapp.accounts.views.site_switch' id=membership.site.id %}">
+                        <a class="btn btn-primary" href="{% url 'bierapp.accounts.views.site_switch' site_id=membership.site.id %}">
                             {% trans 'Switch' %}
                         </a>
                     </td>

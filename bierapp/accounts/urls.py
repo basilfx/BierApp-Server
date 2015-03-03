@@ -18,9 +18,11 @@ urlpatterns = patterns(
     # Sites
     (r"sites/$", "bierapp.accounts.views.sites"),
     (r"sites/create/$", "bierapp.accounts.views.site_create"),
-    (r"sites/(?P<id>\d+)/$", "bierapp.accounts.views.site"),
-    (r"sites/(?P<id>\d+)/switch/$", "bierapp.accounts.views.site_switch"),
-    (r"sites/(?P<id>\d+)/invite/$", "bierapp.accounts.views.site_invite"),
+    (r"sites/(?P<site_id>\d+)/$", "bierapp.accounts.views.site"),
+    (r"sites/(?P<site_id>\d+)/switch/$", "bierapp.accounts.views.site_switch"),
+    (r"sites/(?P<site_id>\d+)/invite/$", "bierapp.accounts.views.site_invite"),
+    (r"sites/(?P<site_id>\d+)/invite/(?P<invite_id>\d+)/revoke/$",
+        "bierapp.accounts.views.site_invite_revoke"),
 
     # Authentication
     (r"login/$", "bierapp.accounts.views.login"),

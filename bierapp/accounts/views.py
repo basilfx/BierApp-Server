@@ -88,7 +88,7 @@ def site_create(request):
         messages.success(request, "Site created.")
 
         # Redirect to site
-        return redirect("bierapp.accounts.views.site", id=site.id)
+        return redirect("bierapp.accounts.views.site", site_id=site.id)
     return render(request, "accounts_site_add.html", locals())
 
 
@@ -144,13 +144,20 @@ def site_invite(request, membership):
             "confirm membership. If the user does not have an account yet, "
             "he or she should register first."))
 
-        return redirect("bierapp.accounts.views.site", id=membership.site.id)
+        return redirect("bierapp.accounts.views.site", site_id=membership.site.id)
     return render(request, "accounts_site_invite.html", locals())
 
 
 @login_required
-def site_invite_done(request, id):
+def site_invite_done(request, site_id):
     return render(request, "accounts_site_invite_done.html", locals())
+
+
+@login_required
+def site_invite_revoke(request, site_id, invite_id):
+    get_object_or_404(UserMembershipInvite, site__id=site_id, id=invite_id).delete()
+
+    return redirect("bierapp.accounts.views.site", site_id=request.site.id)
 
 
 @login_required
