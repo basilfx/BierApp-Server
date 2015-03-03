@@ -112,20 +112,29 @@ def site_switch(request, membership):
 @login_required
 @resolve_membership
 def site_invite(request, membership):
-    if request.membership.is_admin:
+    """
+    Note that `request.membership` can be different from `membership`. To
+    prevent name clashes, `is_admin` is `True` if the current user is an admin
+    of the requested site.
+    """
+
+    site = membership.site
+    is_admin = membership.is_admin
+
+    if is_admin:
         roles = [
             (ROLE_GUEST, _("Guest")),
             (ROLE_MEMBER, _("Member"))]
     else:
-        roles = [(ROLE_MEMBER, _("Member"))]
+        roles = [(ROLE_GUEST, _("Guest"))]
 
     form = UserMembershipInviteForm(
         membership.site, roles, data=request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         # Update an existing invite instead of creating a new one. This will
-        # create a new form, providing an instance. Since it's already valid,
-        # the check can be skipped this time.
+        # create a new form, providing an instance. Since it is already valid,
+        # the validation can be skipped this time.
         try:
             form = UserMembershipInviteForm(
                 membership.site, roles, data=request.POST,
@@ -153,7 +162,8 @@ def site_invite(request, membership):
             "confirm membership. If the user does not have an account yet, "
             "he or she should register first."))
 
-        return redirect("bierapp.accounts.views.site", site_id=membership.site.id)
+        return redirect(
+            "bierapp.accounts.views.site", site_id=membership.site.id)
     return render(request, "accounts_site_invite.html", locals())
 
 
@@ -164,7 +174,8 @@ def site_invite_done(request, site_id):
 
 @login_required
 def site_invite_revoke(request, site_id, invite_id):
-    get_object_or_404(UserMembershipInvite, site__id=site_id, id=invite_id).delete()
+    get_object_or_404(
+        UserMembershipInvite, site__id=site_id, id=invite_id).delete()
 
     return redirect("bierapp.accounts.views.site", site_id=request.site.id)
 
