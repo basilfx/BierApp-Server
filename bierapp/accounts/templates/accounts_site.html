@@ -47,7 +47,13 @@
                 {% if memberships|length > 0 or membership_invites|length > 0 %}
                     {% for membership in memberships %}
                         <tr class="{{ membership.is_hidden|yesno:"italics," }}">
-                            <td>{{ membership.user }}</td>
+                            <td>
+                                {% if request.user == membership.user %}
+                                    <b>{{ membership.user }}</b>
+                                {% else %}
+                                    {{ membership.user }}
+                                {% endif %}
+                            </td>
                             <td>
                                 {{ membership.created|date:"Y-m-d H:i" }}
                             </td>
