@@ -6,11 +6,12 @@ from django.http import StreamingHttpResponse
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_page
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from bierapp.utils.decorators import json_response
 from bierapp.utils.views import paginate
@@ -32,6 +33,63 @@ from cStringIO import StringIO
 import csv
 
 
+def query_balances(site, user, start, per_product):
+    # This can be simplified when Django 1.8 is stable, using conditional
+    # aggregations.
+    product_groups = list(ProductGroup.objects \
+                                      .filter(
+                                          site=site,
+                                          #is_hidden=request.membership.is_admin or None,
+                                          transactionitem__accounted_user=user) \
+                                      .annotate(
+                                          total_count=Sum("transactionitem__count"),
+                                          total_value=Sum("transactionitem__value")))
+    last_balances = list(ProductGroup.objects \
+                                     .filter(
+                                         site=site,
+                                         #is_hidden=request.membership.is_admin or None,
+                                         transactionitem__accounted_user=user,
+                                         transactionitem__transaction__created__lte=start) \
+                                     .annotate(
+                                         total_count=Sum("transactionitem__count"),
+                                         total_value=Sum("transactionitem__value")))
+
+    for product_group in product_groups:
+        product_group.total_count_change = 0
+        product_group.total_value_change = 0
+
+        for last_balance in last_balances:
+            if product_group.id == last_balance.id:
+                product_group.total_count_change = product_group.total_count - last_balance.total_count
+                product_group.total_value_change = product_group.total_value - last_balance.total_value
+
+        if per_product:
+            products = list(product_group.products \
+                                         .filter(transactionitem__accounted_user=user) \
+                                         .annotate(
+                                             total_count=Sum("transactionitem__count"),
+                                             total_value=Sum("transactionitem__value")))
+            last_products = list(product_group.products \
+                                              .filter(
+                                                  transactionitem__accounted_user=user,
+                                                  transactionitem__transaction__created__lte=start) \
+                                              .annotate(
+                                                  total_count=Sum("transactionitem__count"),
+                                                  total_value=Sum("transactionitem__value")))
+            for product in products:
+                product.total_count_change = 0
+                product.total_value_change = 0
+
+                for last_product in last_products:
+                    if product.id == last_product.id:
+                        product.total_count_change = product.total_count - last_product.total_count
+                        product.total_value_change = product.total_value - last_product.total_value
+
+            product_group.all_products = products
+
+    return product_groups
+
+
 @login_required
 def index(request):
     if request.site:
@@ -49,10 +107,8 @@ def index(request):
             .distinct()[:5]
 
         # Current balance
-        product_groups = list(ProductGroup.objects.filter(site=request.site, transactionitem__accounted_user=request.user).annotate(total_count=Sum("transactionitem__count"), total_value=Sum("transactionitem__value")))
-
-        for product_group in product_groups:
-            product_group.all_products = product_group.products.filter(transactionitem__accounted_user=request.user).annotate(total_count=Sum("transactionitem__count"), total_value=Sum("transactionitem__value"))
+        start = timezone.now() - timedelta(days=7)
+        product_groups = query_balances(request.site, request.user, start, True)
 
         return render(request, "bierapp_index.html", locals())
     return render(request, "base_index.html", locals())
@@ -65,10 +121,13 @@ def help(request):
 
 @login_required
 def balance_users(request):
-    users = request.site.users.all()
+    start = timezone.now() - timedelta(days=7)
+    users = request.site.users \
+                        .extra(select={"role": "role"}) \
+                        .order_by("role")
 
     for user in users:
-        user.product_groups = list(ProductGroup.objects.filter(site=request.site, transactionitem__accounted_user=user).annotate(total_count=Sum("transactionitem__count"), total_value=Sum("transactionitem__value")))
+        user.product_groups = query_balances(request.site, user, start, per_product=False)
 
     return render(request, "bierapp_balance_users.html", locals())
 
@@ -76,10 +135,8 @@ def balance_users(request):
 @login_required
 @resolve_user
 def balance_user(request, user):
-    product_groups = list(ProductGroup.objects.filter(site=request.site, transactionitem__accounted_user=user).annotate(total_count=Sum("transactionitem__count"), total_value=Sum("transactionitem__value")))
-
-    for product_group in product_groups:
-        product_group.all_products = product_group.products.filter(transactionitem__accounted_user=user).annotate(total_count=Sum("transactionitem__count"), total_value=Sum("transactionitem__value"))
+    start = timezone.now() - timedelta(days=7)
+    product_groups = query_balances(request.site, user, start, per_product=True)
 
     return render(request, "bierapp_balance_user.html", locals())
 

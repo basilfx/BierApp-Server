@@ -9,17 +9,17 @@
         <meta name="description" content="BierApp, consumptieregistratie voor studentenhuizen.">
         <meta name="author" content="Bas Stottelaar">
 
+        <!-- Style -->
         {% if UNCOMPILED_RESOURCES %}
-            <!-- Less -->
             <link rel="stylesheet/less" href="{% static 'bootstrap/less/bootstrap.less' %}">
             <script type="text/javascript" src="{% static 'less.js/dist/less-1.5.1.js' %}"></script>
         {% else %}
-            <!-- CSS -->
             <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
-            {# <link rel="stylesheet" href="{% static 'css/default.css' %}"> #}
         {% endif %}
 
-        <!-- jQuery -->
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+        <!-- Scripts -->
         {% if UNCOMPILED_RESOURCES %}
             <script type="text/javascript" src="{% static 'jquery/dist/jquery.js' %}"></script>
         {% else %}

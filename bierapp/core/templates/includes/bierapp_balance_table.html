@@ -20,14 +20,30 @@
                         <td rowspan="{{ product_group.all_products|length|add:"1" }}">{{ product_group }}</td>
                         <td>{{ product }}</td>
                         <td>{{ product.total_value }}</td>
-                        <td>{{ product.total_count }}</td>
+                        <td>
+                            {{ product.total_count }}
+
+                            {% if product.total_count_change > 0 %}
+                                <span class="glyphicon glyphicon-arrow-up glyphicon-inline glyphicon-success" title="{{ product.total_count_change }}"></span>
+                            {% elif product.total_count_change < 0 %}
+                                <span class="glyphicon glyphicon-arrow-down glyphicon-inline glyphicon-danger" title="{{ product.total_count_change }}"></span>
+                            {% endif %}
+                        </td>
                         <td>{% estimate_count product_group product %}</td>
                     </tr>
                 {% else %}
                     <tr class="{{ row_color }}">
                         <td>{{ product }}</td>
                         <td>{{ product.total_value }}</td>
-                        <td>{{ product.total_count }}</td>
+                        <td>
+                            {{ product.total_count }}
+
+                            {% if product.total_count_change > 0 %}
+                                <span class="glyphicon glyphicon-arrow-up glyphicon-inline glyphicon-success" title="{{ product.total_count_change }}"></span>
+                            {% elif product.total_count_change < 0 %}
+                                <span class="glyphicon glyphicon-arrow-down glyphicon-inline glyphicon-danger" title="{{ product.total_count_change }}"></span>
+                            {% endif %}
+                        </td>
                         <td>{% estimate_count product_group product %}</td>
                     </tr>
                 {% endif %}
@@ -36,7 +52,15 @@
             <tr class="{{ row_color }}" style="font-style: italic">
                 <td>{% trans 'Total' %}</td>
                 <td>{{ product_group.total_value }}</td>
-                <td>{{ product_group.total_count }}</td>
+                <td>
+                    {{ product_group.total_count }}
+
+                    {% if product_group.total_count_change > 0 %}
+                        <span class="glyphicon glyphicon-arrow-up glyphicon-inline glyphicon-success" title="{{ product_group.total_count_change }}"></span>
+                    {% elif product_group.total_count_change < 0 %}
+                        <span class="glyphicon glyphicon-arrow-down glyphicon-inline glyphicon-danger" title="{{ product_group.total_count_change }}"></span>
+                    {% endif %}
+                </td>
                 <td>&mdash;</td>
             </tr>
         {% empty %}

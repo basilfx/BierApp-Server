@@ -18,8 +18,8 @@
             <tr>
                 <th>{% trans 'User' %}</th>
                 <th>{% trans 'Product group' %}</th>
-                <th>{% trans 'In stock' %}</th>
                 <th>{% trans 'Value' %}</th>
+                <th>{% trans 'In stock' %}</th>
             </tr>
         </thead>
         <tbody>
@@ -30,17 +30,39 @@
                     {% if forloop.counter == 1 %}
                         <tr class="{{ row_color }}">
                             <td rowspan="{{ user.product_groups|length }}">
-                                <a href="{% url 'bierapp.core.views.balance_user' id=user.pk %}">{{ user }}</a>
+                                <a href="{% url 'bierapp.core.views.balance_user' id=user.pk %}">
+                                    {% if request.user == user %}
+                                        <b>{{ user }}</b>
+                                    {% else %}
+                                        {{ user }}
+                                    {% endif %}
+                                </a>
                             </td>
                             <td>{{ product_group }}</td>
-                            <td>{{ product_group.total_count }}</td>
                             <td>{{ product_group.total_value }}</td>
+                            <td>
+                                {{ product_group.total_count }}
+
+                                {% if product_group.total_count_change > 0 %}
+                                    <span class="glyphicon glyphicon-arrow-up glyphicon-inline glyphicon-success" title="{{ product_group.total_count_change }}"></span>
+                                {% elif product_group.total_count_change < 0 %}
+                                    <span class="glyphicon glyphicon-arrow-down glyphicon-inline glyphicon-danger" title="{{ product_group.total_count_change }}"></span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% else %}
                         <tr class="{{ row_color }}">
                             <td>{{ product_group }}</td>
-                            <td>{{ product_group.total_count }}</td>
                             <td>{{ product_group.total_value }}</td>
+                            <td>
+                                {{ product_group.total_count }}
+
+                                {% if product_group.total_count_change > 0 %}
+                                    <span class="glyphicon glyphicon-arrow-up glyphicon-inline glyphicon-success" title="{{ product_group.total_count_change }}"></span>
+                                {% elif product_group.total_count_change < 0 %}
+                                    <span class="glyphicon glyphicon-arrow-down glyphicon-inline glyphicon-danger" title="{{ product_group.total_count_change }}"></span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
                 {% endfor %}
