@@ -10,10 +10,10 @@
 
     <p>
         {% blocktrans %}
-            A product group is a collection containing products which are considered equal. For example,
-            you could have a category with beers that are considered equal. Products in this category
-            are interchangable, meaning one could buy 8 items worth 1, or 4 items worth 2. Products 
-            between two categories are not interchangable, but you could interchange among each other.
+            A product group is a collection containing products which are considered equal. For example, you could have
+            a category with beers that are considered equal. Products in this category are interchangable, meaning one
+            could buy 8 items worth 1, or 4 items worth 2. Products between two categories are not interchangable, but
+            you could interchange among each other.
         {% endblocktrans %}
     </p>
 
@@ -21,8 +21,7 @@
 
     <p>
         {% blocktrans %}
-            A template is a blueprint for returning transactions, just to provide a way to commit 
-            frequent transactions.
+            A template is a blueprint for reccuring transactions, just to provide a way to commit frequent transactions.
         {% endblocktrans %}
     </p>
 
@@ -30,12 +29,20 @@
 
     <p>
         {% blocktrans %}
-            The value is what a certain product in a certain product group is worth.
-            Consider it as credits. The count is the current amount of items
-            available. If you would count the real world inventory, these numbers
-            should match. The estimated stock is what is estimated to be available
-            based on the total product group value and the price per product.
-            Note that products in one product group are equal.
+            The value is what a certain product in a certain product group is worth. Consider it as credits. The count
+            is the current amount of items available. If you would count the real world inventory, these numbers should
+            match. The estimated stock is what is estimated to be available based on the total product group value and
+            the price per product. Note that products in one product group are equal.
+        {% endblocktrans %}
+    </p>
+
+    <h3>{% trans 'What is the difference between accounted user and executing user? '%}</h3>
+
+    <p>
+        {% blocktrans %}
+            This system makes a distinction between accounted users and executing users. The first type of user is the
+            user whose balance will be modified. The second type of user is the one who is actually performing the
+            transaction. This distinction allowes the system to distinghuis between site members and site guests.
         {% endblocktrans %}
     </p>
 
