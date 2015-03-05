@@ -1,9 +1,22 @@
 # BierApp
 Drink management system for student houses. This is the server part.
 
+## Introduction
+This projected once started as a complete studen house management system: cooking, finance, tasks and more. The more part included 'apps' that could be used to extend functionality for specific houses. The actual system was never finished, and only the drink management app was used. Since I graduated in 2015, I am not planning to finish the whole system, but my (former) house is still using the drink management app to register consumptions. I decided to remove everything but the BierApp part, and so it began.
+
+The system is far from ready, but it works and is usable.
+
+## Screenshots
+![Overview](https://raw.github.com/basilfx/BierApp-Server/master/doc/screenshots/overview.png)
+
+![Overview](https://raw.github.com/basilfx/BierApp-Server/master/doc/screenshots/product_groups.png)
+
+![Overview](https://raw.github.com/basilfx/BierApp-Server/master/doc/screenshots/statistics.png)
+
 ## Requirements
 * Django 1.7
 * MySQL database
+* BierApp client
 
 ## Installation
 * Install the dependencies.
@@ -19,6 +32,7 @@ There is a lot of work to do to make it a better and more manageable system. Non
 * Create/Edit forms for all objects
 * Better UI
 * Better Forms
+* Better API
 
 ## License
 See the `LICENSE` file (GPLv3 license). You may change the code freely, but any change must be made available to the public.
