@@ -36,6 +36,7 @@
         $(document).ready(function() {
             var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
             var daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+            var hoursOfDay = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
 
             var lowerCount = function(d) { return d.count < 0 ? Math.abs(d.count) : 0; }
             var upperCount = function(d) { return d.count >= 0 ? d.count : 0; }
@@ -100,9 +101,9 @@
 
                 var pieChart = function(dest, dimension, group, all) {
                     return dest
-                        .width(640)
+                        .width(960)
                         .height(480)
-                        .slicesCap(10)
+                        .slicesCap(15)
                         .radius(220)
                         .innerRadius(30)
                         .dimension(dimension)
@@ -134,17 +135,19 @@
                     var maxValue = group.top(1)[0].value;
 
                     dest
-                        .width(780)
-                        .height(180)
+                        .width(960)
+                        .height(240)
                         .margins({top: 20, right: 50, bottom: 20, left: 50})
                         .dimension(dimension)
                         .group(group)
                         .xBorderRadius(0)
                         .yBorderRadius(0)
                         .rows(d3.scale.ordinal().domain(daysOfWeek))
+                        .cols(d3.scale.ordinal().domain(hoursOfDay))
                         .valueAccessor(function(d) { return daysOfWeek[d.key[0]]; })
                         .keyAccessor(function(d) { return d.key[1]; })
                         .colorAccessor(function(d) { return d.value; })
+                        .title(function(d) { return d.value; })
                         .colors(d3.scale.linear().domain([0, maxValue]).range(["#0066FF", "#FF0000"]))
                         .calculateColorDomain();
 
