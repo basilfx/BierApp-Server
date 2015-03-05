@@ -14,12 +14,12 @@ class TransactionFilter(filters.FilterSet):
         queryset=Product.objects, group_by_field="product_group",
         name="transaction_items__product")
 
-    accounted_user = filters.ModelChoiceFilter(
-        name="transaction_items__accounted_user")
+    accounted_user = GroupedModelChoiceFilter(
+        group_by_field="role",
+        group_label={1: "Admins", 2: "Members", 3: "Guests"},name="transaction_items__accounted_user")
     executing_user = GroupedModelChoiceFilter(
         group_by_field="role",
-        group_label={1: "Admins", 2: "Members", 3: "Guests"},
-        name="transaction_items__executing_user")
+        group_label={1: "Admins", 2: "Members", 3: "Guests"},name="transaction_items__executing_user")
 
     before = filters.DateFilter(name="created", lookup_type="lte")
     after = filters.DateFilter(name="created", lookup_type="gte")
@@ -35,15 +35,13 @@ class TransactionFilter(filters.FilterSet):
     def __init__(self, site, *args, **kwargs):
         super(TransactionFilter, self).__init__(*args, **kwargs)
 
-        self.filters["accounted_user"].extra["queryset"] = \
-            UserMembership.objects \
-                          .filter(
-                              site=site, role__in=[ROLE_ADMIN, ROLE_MEMBER]) \
-                          .prefetch_related("user", "site")
-        self.filters["executing_user"].extra["queryset"] = \
-            UserMembership.objects \
-                          .filter(site=site) \
-                          .prefetch_related("user", "site")
+        users = site.users \
+                    .extra(select={"role": "role"}) \
+                    .order_by("role")
+
+        self.filters["accounted_user"].extra["queryset"] = users
+        self.filters["executing_user"].extra["queryset"] = users
+
         self.filters["product"].extra["queryset"] = \
             Product.objects \
                    .filter(product_group__in=site.product_groups.all()) \

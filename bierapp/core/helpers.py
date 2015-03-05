@@ -10,11 +10,11 @@ class ProductGroupFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('title'),
-            Field('is_app_visible'),
+            Field("title"),
+            Field("is_app_visible"),
 
             FormActions(
-                Submit('submit', 'Add', css_class="btn-primary"),
+                Submit("submit", "Add", css_class="btn-primary"),
             )
         )
 
@@ -22,12 +22,12 @@ class ProductFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('title'),
-            Field('value'),
-            Field('is_app_visible'),
+            Field("title"),
+            Field("value"),
+            Field("is_app_visible"),
 
             FormActions(
-                Submit('submit', 'Add', css_class="btn-primary"),
+                Submit("submit", "Add", css_class="btn-primary"),
             )
         )
 
@@ -35,26 +35,27 @@ class TransactionFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('description', css_class='input-xlarge'),
+            Field("description", css_class="input-xlarge"),
         )
 
     @property
     def form_tag(self):
         return False
 
+
 class InlineTransactionItemFormHelper(FormHelper):
     @property
     def layout(self):
         return Tr(
-            'id',
+            "id",
             Td(
-                Field('product', template="bootstrap3/field_nolabel.html")
+                Field("product", template="bootstrap3/field_nolabel.html")
             ),
             Td(
-                Field('count', template="bootstrap3/field_nolabel.html")
+                Field("count", template="bootstrap3/field_nolabel.html")
             ),
             Td(
-                Field('DELETE', template="bootstrap3/field_nolabel.html")
+                Field("DELETE", template="bootstrap3/field_nolabel.html")
             )
         )
 
@@ -66,12 +67,36 @@ class InlineTransactionItemFormHelper(FormHelper):
     def help_text_inline(self):
         return False
 
+
+class InlineTransactionItemAdminFormHelper(InlineTransactionItemFormHelper):
+    @property
+    def layout(self):
+        return Tr(
+            "id",
+            Td(
+                Field("product", template="bootstrap3/field_nolabel.html")
+            ),
+            Td(
+                Field("accounted_user", template="bootstrap3/field_nolabel.html")
+            ),
+            Td(
+                Field("executing_user", template="bootstrap3/field_nolabel.html")
+            ),
+            Td(
+                Field("count", template="bootstrap3/field_nolabel.html")
+            ),
+            Td(
+                Field("DELETE", template="bootstrap3/field_nolabel.html")
+            )
+        )
+
+
 class DummyFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
             FormActions(
-                Submit('submit', 'Add', css_class="btn-primary"),
+                Submit("submit", "Add", css_class="btn-primary"),
             )
         )
 
@@ -83,10 +108,10 @@ class InviteGuestFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('email'),
+            Field("email"),
 
             FormActions(
-                Submit('submit', 'Add', css_class="btn-primary"),
+                Submit("submit", "Add", css_class="btn-primary"),
             )
         )
 
@@ -94,9 +119,9 @@ class PickTemplateFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            InlineField('template'),
+            InlineField("template"),
             HTML("&nbsp;"),
-            Submit('submit', 'Execute', css_class="btn-primary")
+            Submit("submit", "Execute", css_class="btn-primary")
         )
 
     @property
@@ -115,7 +140,7 @@ class ExportFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('export_type'),
+            Field("export_type"),
         )
 
     @property
@@ -130,12 +155,12 @@ class TransactionFilterHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('after'),
-            Field('before'),
-            Field('description'),
-            Field('product'),
-            Field('accounted_user'),
-            Field('executing_user'),
+            Field("after"),
+            Field("before"),
+            Field("description"),
+            Field("product"),
+            Field("accounted_user"),
+            Field("executing_user"),
         )
 
     @property
@@ -150,9 +175,9 @@ class RangeFilterHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field('after'),
-            Field('before'),
-            Field('description'),
+            Field("after"),
+            Field("before"),
+            Field("description"),
         )
 
     @property

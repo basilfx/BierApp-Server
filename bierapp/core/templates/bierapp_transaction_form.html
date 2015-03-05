@@ -15,6 +15,10 @@
             <thead>
                 <tr>
                     <th>{% trans 'Product' %}</th>
+                    {% if request.membership.is_admin %}
+                        <th>{% trans 'Accounted user' %}</th>
+                        <th>{% trans 'Executing user' %}</th>
+                    {% endif %}
                     <th>{% trans 'Count' %}</th>
                     <th>{% trans 'Actions' %}</th>
                 </tr>

@@ -23,6 +23,9 @@ from bierapp.core.models import Transaction, TransactionItem, ProductGroup, \
     Product
 from bierapp.core.decorators import resolve_user, resolve_product, \
     resolve_transaction, resolve_product_group, resolve_template
+from bierapp.core.helpers import InlineTransactionItemFormHelper, \
+    InlineTransactionItemAdminFormHelper
+from bierapp.utils.fields import GroupedModelChoiceField
 
 from cStringIO import StringIO
 
@@ -215,10 +218,63 @@ def transactions_export(request):
 @login_required
 @resolve_template
 def transaction_create(request, template=None):
+    products = Product.objects \
+                      .filter(product_group__site=request.site) \
+                      .prefetch_related("product_group") \
+                      .order_by("product_group")
+
+    users = request.site.users \
+                        .extra(select={"role": "role"}) \
+                        .order_by("role")
+
     class InnerForm(InlineTransactionItemForm):
+        """
+        Extend `InlineTransactionItemForm` to make it context aware. Admin
+        users have the oppertunity to set the accounted user and executing user
+        of a transaction item.
+        """
+
+        # Form layout helper
+        if request.membership.is_admin:
+            helper = InlineTransactionItemAdminFormHelper
+        else:
+            helper = InlineTransactionItemFormHelper
+
+        # Form fields
+        product = GroupedModelChoiceField(products, "product_group")
+
+        if request.membership.is_admin:
+            accounted_user = GroupedModelChoiceField(
+                users, group_by_field="role",
+                group_label={1: "Admins", 2: "Members", 3: "Guests"})
+            executing_user = GroupedModelChoiceField(
+                users, group_by_field="role",
+                group_label={1: "Admins", 2: "Members", 3: "Guests"})
+
         def __init__(self, *args, **kwargs):
-            product_groups = request.site.product_groups.all()
-            super(InnerForm, self).__init__(product_groups=product_groups, accounted_user=request.user, *args, **kwargs)
+            if request.membership.is_admin:
+                kwargs["initial"] = {
+                    "accounted_user": request.user,
+                    "executing_user": request.user,
+                }
+
+            super(InnerForm, self).__init__(*args, **kwargs)
+
+            if not request.membership.is_admin:
+                del self.fields["accounted_user"]
+                del self.fields["executing_user"]
+
+        def save(self, commit=True):
+            transaction_item = super(InnerForm, self).save(commit=False)
+
+            if not request.membership.is_admin:
+                transaction_item.accounted_user = request.user
+                transaction_item.executing_user = request.user
+
+            if commit:
+                transaction_item.save()
+
+            return transaction_item
 
     TransactionFormSet = inlineformset_factory(Transaction, TransactionItem, form=InnerForm)
     form = TransactionForm(site=request.site, data=request.POST or None)
@@ -232,7 +288,7 @@ def transaction_create(request, template=None):
             formset.save()
 
             # Post message
-            messages.success(request, "Transaction added.")
+            messages.success(request, _("Transaction added."))
 
             # Redirect
             return redirect("bierapp.core.views.transactions")

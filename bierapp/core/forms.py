@@ -6,7 +6,7 @@ from bierapp.core.models import ProductGroup, \
     Product, Transaction, TransactionItem, TransactionTemplate
 from bierapp.core.helpers import ProductGroupFormHelper, \
     ProductFormHelper, TransactionFormHelper, \
-    InlineTransactionItemFormHelper, DummyFormHelper, InviteGuestFormHelper, \
+    DummyFormHelper, InviteGuestFormHelper, \
     ExportFormHelper, PickTemplateFormHelper
 from bierapp.utils.fields import GroupedModelChoiceField
 
@@ -52,27 +52,16 @@ class TransactionForm(forms.ModelForm):
 
 
 class InlineTransactionItemForm(forms.ModelForm):
-    product = GroupedModelChoiceField(Product.objects, "product_group")
-    helper = InlineTransactionItemFormHelper
 
     class Meta:
         model = TransactionItem
-        fields = ("product", "count", )
-
-    def __init__(self, product_groups, accounted_user, executing_user=None, *args, **kwargs):
-        super(InlineTransactionItemForm, self).__init__(*args, **kwargs)
-
-        self.fields["product"].queryset = Product.objects.filter(product_group__in=product_groups)
-        self.accounted_user = accounted_user
-        self.executing_user = executing_user if executing_user is not None else accounted_user
+        fields = ("product", "count", "accounted_user", "executing_user")
 
     def save(self, commit=True):
         transaction_item = super(InlineTransactionItemForm, self).save(commit=False)
 
         transaction_item.product_group = self.cleaned_data["product"].product_group
         transaction_item.value = self.cleaned_data["product"].value * self.cleaned_data["count"]
-        transaction_item.accounted_user = self.accounted_user
-        transaction_item.executing_user = self.executing_user
 
         if commit:
             transaction_item.save()
