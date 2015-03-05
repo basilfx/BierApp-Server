@@ -11,7 +11,7 @@ class ProductGroup(models.Model):
     site = models.ForeignKey(Site, related_name="product_groups")
     title = models.CharField(max_length=255)
 
-    is_app_visible = models.BooleanField(default=True)
+    is_hidden = models.BooleanField(default=True)
 
     def __unicode__(self):
         return unicode(self.title)
@@ -76,7 +76,7 @@ class Product(TimeStampedModel, models.Model):
     title = models.CharField(max_length=255)
     value = models.DecimalField(max_digits=10, decimal_places=2)
 
-    is_app_visible = models.BooleanField(default=True)
+    is_hidden = models.BooleanField(default=True)
     product_group = models.ForeignKey(ProductGroup, related_name="products")
 
     logo = models.ImageField(

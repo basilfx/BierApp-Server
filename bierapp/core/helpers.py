@@ -11,7 +11,7 @@ class ProductGroupFormHelper(FormHelper):
     def layout(self):
         return Layout(
             Field("title"),
-            Field("is_app_visible"),
+            Field("is_hidden"),
 
             FormActions(
                 Submit("submit", "Add", css_class="btn-primary"),
@@ -24,7 +24,7 @@ class ProductFormHelper(FormHelper):
         return Layout(
             Field("title"),
             Field("value"),
-            Field("is_app_visible"),
+            Field("is_hidden"),
 
             FormActions(
                 Submit("submit", "Add", css_class="btn-primary"),

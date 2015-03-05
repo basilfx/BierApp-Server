@@ -30,7 +30,9 @@
             <tr>
                 <th>{% trans 'Title' %}</th>
                 <th>{% trans 'Value' %}</th>
-                <th>{% trans 'Visible in App' %}</th>
+                {% if request.membership.is_admin %}
+                    <th>{% trans 'Hidden' %}</th>
+                {% endif %}
                 <th>{% trans 'Actions' %}</th>
             </tr>
         </thead>
@@ -39,12 +41,14 @@
                 <tr>
                     <td><a href="{{ product.get_absolute_url }}">{{ product.title }}</a></td>
                     <td>{{ product.value }}</td>
-                    <td>{{ product.is_app_visible|yesno:"Yes,No" }}</td>
+                    {% if request.membership.is_admin %}
+                        <td>{{ product_group.is_hidden|yesno:"Yes,No" }}</td>
+                    {% endif %}
                     <td></td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4">
+                    <td colspan="{% if request.membership.is_admin %}4{% else %}3{% endif %}">
                         {% trans 'No products to show' %}
                     </td>
                 </tr>

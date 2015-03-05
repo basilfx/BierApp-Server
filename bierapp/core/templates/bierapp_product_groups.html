@@ -30,7 +30,9 @@
             <tr>
                 <th>{% trans 'Name' %}</th>
                 <th>{% trans 'Products' %}</th>
-                <th>{% trans 'Visible in App' %}</th>
+                {% if request.membership.is_admin %}
+                    <th>{% trans 'Hidden' %}</th>
+                {% endif %}
                 <th>{% trans 'Actions' %}</th>
             </tr>
         </thead>
@@ -43,12 +45,14 @@
                         </a>
                     </td>
                     <td>{{ product_group.product_count }}</td>
-                    <td>{{ product_group.is_app_visible|yesno:"Yes,No" }}</td>
+                    {% if request.membership.is_admin %}
+                        <td>{{ product_group.is_hidden|yesno:"Yes,No" }}</td>
+                    {% endif %}
                     <td></td>
                 </tr>
             {% empty %}
                 <tr >
-                    <td colspan="4">
+                    <td colspan="{% if request.membership.is_admin %}4{% else %}3{% endif %}">
                         {% trans 'No product groups to show' %}
                     </td>
                 </tr>

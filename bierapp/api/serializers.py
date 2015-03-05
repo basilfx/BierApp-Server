@@ -18,7 +18,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ("site", "is_app_visible")
+        exclude = ("site", "is_hidden")
 
     def get_logo(self, product):
         request = self.context["request"]

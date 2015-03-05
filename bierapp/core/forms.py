@@ -18,7 +18,7 @@ class ProductGroupForm(forms.ModelForm):
 
     class Meta:
         model = ProductGroup
-        fields = ("title", "is_app_visible")
+        fields = ("title", "is_hidden")
 
 
 class ProductForm(forms.ModelForm):
@@ -26,7 +26,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ("title", "value", "is_app_visible")
+        fields = ("title", "value", "is_hidden")
 
 
 class TransactionForm(forms.ModelForm):

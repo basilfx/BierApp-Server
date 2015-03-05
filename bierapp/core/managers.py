@@ -2,7 +2,7 @@ from django.db import models
 
 
 class ApiManager(models.Manager):
-    def __init__(self, field="is_app_visible", *args, **kwargs):
+    def __init__(self, field="is_hidden", *args, **kwargs):
         super(ApiManager, self).__init__(*args, **kwargs)
 
         # Precompute filter

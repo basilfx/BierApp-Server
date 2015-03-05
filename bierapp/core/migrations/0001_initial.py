@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('title', models.CharField(max_length=255)),
                 ('value', models.DecimalField(max_digits=10, decimal_places=2)),
-                ('is_app_visible', models.BooleanField(default=True)),
+                ('is_hidden', models.BooleanField(default=True)),
                 ('logo', models.ImageField(height_field=b'logo_height', width_field=b'logo_width', null=True, upload_to=b'apps/bierapp/logos/')),
                 ('logo_height', models.PositiveIntegerField(null=True)),
                 ('logo_width', models.PositiveIntegerField(null=True)),
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('title', models.CharField(max_length=255)),
-                ('is_app_visible', models.BooleanField(default=True)),
+                ('is_hidden', models.BooleanField(default=True)),
                 ('site', models.ForeignKey(related_name='product_groups', to='accounts.Site')),
             ],
             options={
