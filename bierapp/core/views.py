@@ -171,10 +171,11 @@ def transactions_export(request):
 
     if export_type == "csv":
         def _inner_to_csv(data):
-            sio = StringIO()
-            writer = csv.writer(sio)
+            output = StringIO()
+            writer = csv.writer(output)
             writer.writerow(data)
-            return sio.getvalue()
+
+            return output.getvalue()
 
         def _inner_stream():
             # Export header

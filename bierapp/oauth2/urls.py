@@ -8,19 +8,15 @@ urlpatterns = patterns(
     "",
 
     url(
-        r"^authorize/?$",
-        login_required(Capture.as_view()),
+        r"^authorize/?$", login_required(Capture.as_view()),
         name="capture"),
     url(
-        r"^authorize/confirm/?$",
-        login_required(Authorize.as_view()),
+        r"^authorize/confirm/?$", login_required(Authorize.as_view()),
         name="authorize"),
     url(
-        r"^redirect/?$",
-        login_required(Redirect.as_view()),
+        r"^redirect/?$", login_required(Redirect.as_view()),
         name="redirect"),
     url(
-        r"^access_token/?$",
-        csrf_exempt(AccessTokenView.as_view()),
+        r"^access_token/?$", csrf_exempt(AccessTokenView.as_view()),
         name="access_token"),
 )
