@@ -104,16 +104,6 @@ class DummyFormHelper(FormHelper):
     def form_tag(self):
         return False
 
-class InviteGuestFormHelper(FormHelper):
-    @property
-    def layout(self):
-        return Layout(
-            Field("email"),
-
-            FormActions(
-                Submit("submit", "Add", css_class="btn-primary"),
-            )
-        )
 
 class PickTemplateFormHelper(FormHelper):
     @property

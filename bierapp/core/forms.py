@@ -6,8 +6,7 @@ from bierapp.core.models import ProductGroup, \
     Product, Transaction, TransactionItem, TransactionTemplate
 from bierapp.core.helpers import ProductGroupFormHelper, \
     ProductFormHelper, TransactionFormHelper, \
-    DummyFormHelper, InviteGuestFormHelper, \
-    ExportFormHelper, PickTemplateFormHelper
+    DummyFormHelper, ExportFormHelper, PickTemplateFormHelper
 from bierapp.utils.fields import GroupedModelChoiceField
 
 import time
