@@ -53,4 +53,13 @@
             You are probably not a site administrator.
         {% endblocktrans %}
     </p>
+
+    <h3>{% trans 'Why is it not possible to delete a transaction?' %}</h3>
+
+    <p>
+        {% blocktrans %}
+            That would be unfair because others cannot follow what is going on. If you accidentally added a transaction
+            that should not have happened, then commit another one that complements the fauly one.
+        {% endblocktrans %}
+    </p>
 {% endblock content %}

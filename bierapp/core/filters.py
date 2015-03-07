@@ -1,6 +1,7 @@
 from bierapp.accounts.models import UserMembership, ROLE_ADMIN, ROLE_MEMBER
 from bierapp.core.models import Transaction, Product, ProductGroup
-from bierapp.core.helpers import TransactionFilterHelper, RangeFilterHelper
+from bierapp.core.helpers import TransactionFilterHelper, \
+    TransactionRangeFilterHelper
 from bierapp.utils.filters import GroupedModelChoiceFilter
 
 import django_filters as filters
@@ -76,5 +77,6 @@ class TransactionRangeFilter(filters.FilterSet):
     @property
     def form(self):
         if not hasattr(self, "_form"):
-            super(TransactionRangeFilter, self).form.helper = RangeFilterHelper()
+            super(TransactionRangeFilter, self).form.helper = \
+                TransactionRangeFilterHelper()
         return self._form

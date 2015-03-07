@@ -134,10 +134,6 @@ class ExportFormHelper(FormHelper):
         )
 
     @property
-    def form_class(self):
-        return "form-horizontal"
-
-    @property
     def form_method(self):
         return "GET"
 
@@ -154,24 +150,16 @@ class TransactionFilterHelper(FormHelper):
         )
 
     @property
-    def form_class(self):
-        return "form-horizontal"
-
-    @property
     def form_method(self):
         return "GET"
 
-class RangeFilterHelper(FormHelper):
+class TransactionRangeFilterHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
             Field("after", css_class="datetimepicker"),
             Field("before", css_class="datetimepicker"),
         )
-
-    @property
-    def form_class(self):
-        return "form-horizontal"
 
     @property
     def form_method(self):

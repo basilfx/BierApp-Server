@@ -16,6 +16,7 @@ from bierapp.accounts.forms import RegisterForm, UserMembershipInviteForm, \
     ChooseSiteForm
 from bierapp.accounts.decorators import resolve_membership
 
+import random
 
 @login_required
 def password(request):
@@ -246,6 +247,13 @@ def login(request):
     will redirect the user to a page for choosing a site. This is useful during
     OAUTH2 related requests.
     """
+
+    background_url = random.choice([
+        "img/landing_bg_1.jpg",
+        "img/landing_bg_2.jpg",
+        "img/landing_bg_3.jpg",
+        "img/landing_bg_4.jpg",
+    ])
 
     is_authenticated = request.user.is_authenticated()
     is_choose_site = "choose_site" in request.GET or \

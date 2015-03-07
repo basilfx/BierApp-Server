@@ -9,8 +9,8 @@ class AuthenticationFormHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            PrependedText("username", "@"),
-            PrependedText("password", "K"),
+            Field("username"),
+            Field("password"),
             Field("remember_me"),
 
             Div(
@@ -21,10 +21,6 @@ class AuthenticationFormHelper(FormHelper):
                 css_class="control-group"
             )
         )
-
-    @property
-    def form_class(self):
-        return "form-horizontal"
 
 
 class ChangePasswordFormHelper(FormHelper):
@@ -41,10 +37,6 @@ class ChangePasswordFormHelper(FormHelper):
             )
         )
 
-    @property
-    def form_class(self):
-        return "form-horizontal"
-
 
 class ChangeProfileFormHelper(FormHelper):
     @property
@@ -59,10 +51,6 @@ class ChangeProfileFormHelper(FormHelper):
                 Submit("submit", _("Upload"), css_class="btn-primary")
             )
         )
-
-    @property
-    def form_class(self):
-        return "form-horizontal"
 
 
 class RegisterFormHelper(FormHelper):
@@ -80,10 +68,6 @@ class RegisterFormHelper(FormHelper):
                 Submit("register", _("Register"), css_class="btn-primary"),
             )
         )
-
-    @property
-    def form_class(self):
-        return "form-horizontal"
 
 
 class ChooseSiteFormHelper(FormHelper):
@@ -129,7 +113,3 @@ class UserMembershipInviteFormHelper(FormHelper):
                 Submit("submit", _("Invite"), css_class="btn-primary"),
             )
         )
-
-    @property
-    def form_class(self):
-        return "form-horizontal"

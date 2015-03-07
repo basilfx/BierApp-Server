@@ -4,35 +4,40 @@
 {% block head %}{% endblock head %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 col-offset-3 panel">
-                <h1 class="margin-base-vertical">
-                    {% trans 'Dinner is ready!' %}
-                </h1>
+    <div class="vertical-center"
+        <div class="container">
+            <div class="center-block" style="width: 360px">
+                <div class="row panel">
+                    <div class="col-lg-12">
+                        <h1 class="margin-base-vertical">
+                            {% trans 'Dinner is ready!' %}
+                        </h1>
 
-                <p>
-                    {% blocktrans %}
-                        BierApp is a drink management platform for student houses. Management, statistics and more with a few easy clicks.
-                    {% endblocktrans %}
-                </p>
+                        <p>
+                            {% blocktrans %}
+                                BierApp is a drink management platform for student houses. Management, statistics and more with
+                                a few easy clicks.
+                            {% endblocktrans %}
+                        </p>
 
-                <p>
-                    {% blocktrans %}
-                        Login, or create a new account. For free.
-                    {% endblocktrans %}
-                </p>
+                        <p>
+                            {% blocktrans %}
+                                Login, or create a new account. It's for free!
+                            {% endblocktrans %}
+                        </p>
 
-                {% crispy form %}
+                        {% crispy form %}
 
-                <ul class="list-unstyled">
-                    <li>
-                        <a href="{% url 'bierapp.accounts.views.register' %}">Register new account</a>
-                    </li>
-                    <li>
-                        <a href="#">Forgot password</a>
-                    </li>
-                </ul>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a href="{% url 'bierapp.accounts.views.register' %}">{% trans 'Register new account' %}</a>
+                            </li>
+                            <li>
+                                <a href="#">{% trans 'Forgot password' %}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
