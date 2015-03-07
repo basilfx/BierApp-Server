@@ -6,12 +6,20 @@
         <h1>{% trans 'My Profile' %}</h1>
     </div>
 
-    {# {% if request.user.avatar %}
+    <p>
+        {% url 'bierapp.accounts.views.password' as password_url %}
+
+        {% blocktrans %}
+            You can change your password <a href="{{ password_url }}">here</a>.
+        {% endblocktrans %}
+    </p>
+
+    {% if request.user.avatar %}
         <div class="thumbnail">
             <img src="{{ request.user.avatar.url }}">
             <h3>{{ request.user.avatar.width }}x{{ request.user.avatar.height }}</h3>
         </div>
-    {% endif %} #}
+    {% endif %}
 
     {% crispy form %}
 {% endblock content %}

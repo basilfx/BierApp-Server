@@ -28,7 +28,7 @@ def password(request):
         messages.success(request, "Password changed.")
 
         # Redirect back
-        return redirect("bierapp.accounts.views.index")
+        return redirect("bierapp.accounts.views.password")
 
     return render(request, "accounts_password.html", locals())
 
