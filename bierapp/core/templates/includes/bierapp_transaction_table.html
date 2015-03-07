@@ -35,10 +35,28 @@
                     <td>{{ transaction_item.value }}</td>
 
                     {% if transaction_item.accounted_user != transaction_item.executing_user  %}
-                        <td>{{ transaction_item.executing_user }}</td>
-                        <td>{{ transaction_item.accounted_user }}</td>
+                        <td>
+                            {% if request.user == transaction_item.executing_user %}
+                                <b>{{ transaction_item.executing_user }}</b>
+                            {% else %}
+                                {{ transaction_item.executing_user }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if request.user == transaction_item.accounted_user %}
+                                <b>{{ transaction_item.accounted_user }}</b>
+                            {% else %}
+                                {{ transaction_item.accounted_user }}
+                            {% endif %}
+                        </td>
                     {% else %}
-                        <td colspan="2">{{ transaction_item.accounted_user }}</td>
+                        <td colspan="2">
+                            {% if request.user == transaction_item.accounted_user %}
+                                <b>{{ transaction_item.accounted_user }}</b>
+                            {% else %}
+                                {{ transaction_item.accounted_user }}
+                            {% endif %}
+                        </td>
                     {% endif %}
                 </tr>
             {% endfor %}
