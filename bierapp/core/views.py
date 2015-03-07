@@ -13,7 +13,7 @@ from django.contrib import messages
 
 from datetime import datetime, timedelta
 
-from bierapp.utils.decorators import json_response
+from bierapp.utils.http import StreamingJsonResponse
 from bierapp.utils.views import paginate
 
 from bierapp.accounts.models import User, UserMembership
@@ -484,7 +484,6 @@ def stats(request):
 
 @login_required
 @cache_page(60 * 5)
-@json_response
 def stats_transaction_items(request):
     transactions = TransactionFilter(data=request.GET, site=request.site)
 
@@ -492,13 +491,12 @@ def stats_transaction_items(request):
         .filter(transaction__in=transactions) \
         .prefetch_related("executing_user", "product")
 
-    return [{
+    return StreamingJsonResponse([{
             "transaction_id": transaction_item.transaction.pk,
             "created": unicode(transaction_item.transaction.created),
             "product_id": transaction_item.product.pk,
             "product": unicode(transaction_item.product),
             "count": transaction_item.count,
-            "value": transaction_item.value,
             "executing_user_id": transaction_item.executing_user.pk,
             "executing_user": unicode(transaction_item.executing_user),
-        } for transaction_item in queryset]
+        } for transaction_item in queryset])
