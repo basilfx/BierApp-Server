@@ -7,10 +7,22 @@
     </div>
 
     <p>
-        {% blocktrans %}
-            This is a summary of the balances for all members of this site. Click a user to
-            retrieve more information.
-        {% endblocktrans %}
+        <div class="row">
+            <div class="col-md-8">
+                {% blocktrans %}
+                    This is a summary of the balances for all members of this site. Click a user to retrieve more information.
+                {% endblocktrans %}
+            </div>
+            <div class="col-md-4">
+                <div class="btn-toolbar pull-right no-margin">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#modal-range">
+                            {% trans 'Change range' %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </p>
 
     <table class="table table-bordered">
@@ -69,4 +81,6 @@
             {% endfor %}
         </tbody>
     </table>
+
+    {% include 'includes/modal_range_form.html' %}
 {% endblock content %}

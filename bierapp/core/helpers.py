@@ -145,8 +145,8 @@ class TransactionFilterHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field("after"),
-            Field("before"),
+            Field("after", css_class="datetimepicker"),
+            Field("before", css_class="datetimepicker"),
             Field("description"),
             Field("product"),
             Field("accounted_user"),
@@ -165,9 +165,8 @@ class RangeFilterHelper(FormHelper):
     @property
     def layout(self):
         return Layout(
-            Field("after"),
-            Field("before"),
-            Field("description"),
+            Field("after", css_class="datetimepicker"),
+            Field("before", css_class="datetimepicker"),
         )
 
     @property

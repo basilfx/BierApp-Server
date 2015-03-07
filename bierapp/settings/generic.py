@@ -104,6 +104,7 @@ BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "bierapp/static/")
 BOWER_INSTALLED_APPS = (
     "bootstrap",
     "bootstrap-notify",
+    "eonasdan-bootstrap-datetimepicker",
     "crossfilter#master",
     "dcjs#master",
     "less.js",

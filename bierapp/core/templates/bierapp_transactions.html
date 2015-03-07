@@ -1,22 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n crispy_forms_tags %}
 
-{% block head %}
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("#button-filters-submit").click(function(e) {
-                e.preventDefault();
-                $("#modal-filters form").submit();
-            });
-
-            $("#button-export-submit").click(function(e) {
-                e.preventDefault();
-                $("#modal-export form").submit();
-            });
-        });
-    </script>
-{% endblock head %}
-
 {% block content %}
     <div class="page-header">
         <h1>{% trans 'Transactions' %}</h1>
@@ -62,43 +46,6 @@
 
     {% include 'paginator.html' with objects=transactions %}
 
-    <div id="modal-filters" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3>{% trans 'Filters' %}</h3>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Dates are in YYYY-MM-DD format.
-                    </p>
-
-                    {% crispy form_filter %}
-                </div>
-                <div class="modal-footer">
-                    <a href="#" data-dismiss="modal" class="btn btn-default">{% trans 'Close' %}</a>
-                    <a href="#" id="button-filters-submit" class="btn btn-primary">{% trans 'Apply' %}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-export" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3>{% trans 'Export' %}</h3>
-                </div>
-                <div class="modal-body">
-                    {% crispy form_export %}
-                </div>
-                <div class="modal-footer">
-                    <a href="#" data-dismiss="modal" class="btn btn-default">{% trans 'Close' %}</a>
-                    <a href="#" id="button-export-submit" class="btn btn-primary">{% trans 'Export' %}</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'includes/modal_filters_form.html' %}
+    {% include 'includes/modal_export_form.html' %}
 {% endblock content %}

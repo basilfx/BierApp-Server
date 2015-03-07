@@ -8,7 +8,7 @@ from rest_framework import permissions
 from itertools import groupby
 
 from bierapp.accounts.models import User
-from bierapp.core.filters import TransactionFilter, RangeFilter
+from bierapp.core.filters import TransactionFilter
 from bierapp.core.models import Product, Transaction, TransactionItem, XPTransaction
 from bierapp.api.serializers import ProductSerializer, TransactionSerializer, UserSerializer, UserInfoSerializer
 
@@ -146,7 +146,7 @@ class Stats(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        transactions = RangeFilter(data=request.GET, site=request.site)
+        transactions = TransactionFilter(data=request.GET, site=request.site)
         transaction_items = TransactionItem.objects \
             .filter(transaction__in=transactions, count__lt=0) \
             .aggregate(count=Sum("count"))

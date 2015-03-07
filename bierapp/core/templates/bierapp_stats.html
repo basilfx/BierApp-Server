@@ -2,7 +2,6 @@
 {% load i18n static crispy_forms_tags %}
 
 {% block head %}
-
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'dcjs/dc.css' %}">
 
@@ -26,13 +25,6 @@
     {% endif %}
 
     <script type="text/javascript">
-        $(document).ready(function() {
-            $("#button-range-submit").click(function(e) {
-                e.preventDefault();
-                $("#modal-range form").submit();
-            });
-        });
-
         $(document).ready(function() {
             var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
             var daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -73,8 +65,8 @@
                     e.day = d3.time.day(e.created);
                     e.hour = d3.time.hour(e.created);
 
-                    if (userIds.indexOf(e.user_id) == -1) {
-                        userIds.push(e.user_id);
+                    if (userIds.indexOf(e.executing_user_id) == -1) {
+                        userIds.push(e.executing_user_id);
                     }
                 });
 
@@ -85,7 +77,7 @@
 
                 var dimensions = {
                     days: data.dimension(function(d) { return d.day }),
-                    users: data.dimension(function(d) { return d.user }),
+                    users: data.dimension(function(d) { return d.executing_user }),
                     products: data.dimension(function(d) { return d.product }),
                     dayOfWeek: data.dimension(function(d) { return [+d.created.getDay(), +d.created.getHours()] })
                 };
@@ -195,14 +187,14 @@
                     function builder(id) {
                         return {
                             upper: dimensions.days.group().reduceSum(function (d) {
-                                if (d.user_id == id) {
+                                if (d.executing_user_id == id) {
                                     return upperCount(d);
                                 } else {
                                     return 0;
                                 }
                             }),
                             lower: dimensions.days.group().reduceSum(function (d) {
-                                if (d.user_id == id) {
+                                if (d.executing_user_id == id) {
                                     return lowerCount(d);
                                 } else {
                                     return 0;
@@ -263,8 +255,8 @@
             <div class="col-md-4">
                 <div class="btn-toolbar pull-right no-margin">
                     <div class="btn-group">
-                        <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#modal-range">
-                            {% trans 'Change range' %}
+                        <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#modal-filters">
+                            {% trans 'Change filters' %}
                         </a>
                     </div>
                 </div>
@@ -276,24 +268,24 @@
         <img src="{{ STATIC_URL }}img/spinner.gif">
     </div>
     <div class="row text-center" id="error" style="display: none">
-        <h2>Nothing to show. Change your filters.</h2>
+        <h2>{% trans 'Nothing to show. Change your selection criteria and/or filters.' %}</h2>
     </div>
 
     <ul class="nav nav-tabs" id="tabs" style="display: none">
         <li class="active">
-            <a href="#tab-1" data-toggle="tab">Transactions</a>
+            <a href="#tab-1" data-toggle="tab">{% trans 'Transactions' %}</a>
         </li>
         <li>
-            <a href="#tab-2" data-toggle="tab">Users</a>
+            <a href="#tab-2" data-toggle="tab">{% trans 'Users' %}</a>
         </li>
         <li>
-            <a href="#tab-3" data-toggle="tab">Products</a>
+            <a href="#tab-3" data-toggle="tab">{% trans 'Products' %}</a>
         </li>
         <li>
-            <a href="#tab-4" data-toggle="tab">Count</a>
+            <a href="#tab-4" data-toggle="tab">{% trans 'Count' %}</a>
         </li>
         <li>
-            <a href="#tab-5" data-toggle="tab">Punch card</a>
+            <a href="#tab-5" data-toggle="tab">{% trans 'Punch card' %}</a>
         </li>
         <li class="pull-right">
             <p class="navbar-text" id="data-count">
@@ -399,25 +391,5 @@
         </div>
     </div>
 
-    <div id="modal-range" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3>{% trans 'Change Range' %}</h3>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Dates are in YYYY-MM-DD format.
-                    </p>
-
-                    {% crispy form_range %}
-                </div>
-                <div class="modal-footer">
-                    <a href="#" data-dismiss="modal" class="btn btn-default">{% trans 'Close' %}</a>
-                    <a href="#" id="button-range-submit" class="btn btn-primary">{% trans 'Apply' %}</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'includes/modal_filters_form.html' %}
 {% endblock content %}

@@ -106,11 +106,18 @@ class Transaction(TimeStampedModel, models.Model):
 
 
 class TransactionItem(models.Model):
+    """
+
+    Although `product_group` can be derrived from `product`, it is added
+    because a product can move to a different product group. Furthermore, it
+    simplifies lookups.
+    """
+
     transaction = models.ForeignKey(
         "Transaction", related_name="transaction_items")
 
     product = models.ForeignKey(Product)
-    product_group = models.ForeignKey(ProductGroup)
+    #product_group = models.ForeignKey(ProductGroup)
     count = models.IntegerField(null=False, default=0)
     value = models.DecimalField(max_digits=10, decimal_places=2)
 

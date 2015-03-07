@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Field
+from crispy_forms.layout import Layout, Div, Submit, Field, Button
 from crispy_forms.bootstrap import PrependedText, FormActions
 
 
@@ -52,11 +52,11 @@ class ChangeProfileFormHelper(FormHelper):
         return Layout(
             Field("first_name"),
             Field("last_name"),
-            Field("birthdate"),
+            Field("birthdate", css_class="datepicker"),
             Field("avatar"),
 
             FormActions(
-                Submit("submit", _("Upload"), css_class="btn-primary"),
+                Submit("submit", _("Upload"), css_class="btn-primary")
             )
         )
 

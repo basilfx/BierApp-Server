@@ -1,5 +1,5 @@
 from bierapp.accounts.models import UserMembership, ROLE_ADMIN, ROLE_MEMBER
-from bierapp.core.models import Transaction, Product
+from bierapp.core.models import Transaction, Product, ProductGroup
 from bierapp.core.helpers import TransactionFilterHelper, RangeFilterHelper
 from bierapp.utils.filters import GroupedModelChoiceFilter
 
@@ -47,6 +47,8 @@ class TransactionFilter(filters.FilterSet):
                    .filter(product_group__in=site.product_groups.all()) \
                    .prefetch_related("product_group")
 
+        self.queryset = self.queryset.filter(site=site)
+
     @property
     def form(self):
         if not hasattr(self, "_form"):
@@ -55,25 +57,24 @@ class TransactionFilter(filters.FilterSet):
         return self._form
 
 
-class RangeFilter(filters.FilterSet):
+class TransactionRangeFilter(filters.FilterSet):
     """
     """
 
     before = filters.DateTimeFilter(name="created", lookup_type="lte")
     after = filters.DateTimeFilter(name="created", lookup_type="gte")
 
-    description = filters.CharFilter(
-        name="description", lookup_type="icontains")
-
     class Meta:
         model = Transaction
-        fields = ("after", "before", "description")
+        fields = ("after", "before")
 
     def __init__(self, site, *args, **kwargs):
-        super(RangeFilter, self).__init__(*args, **kwargs)
+        super(TransactionRangeFilter, self).__init__(*args, **kwargs)
+
+        self.queryset = self.queryset.filter(site=site)
 
     @property
     def form(self):
         if not hasattr(self, "_form"):
-            super(RangeFilter, self).form.helper = RangeFilterHelper()
+            super(TransactionRangeFilter, self).form.helper = RangeFilterHelper()
         return self._form

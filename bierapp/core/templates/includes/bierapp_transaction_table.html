@@ -30,7 +30,7 @@
             {% for transaction_item in transaction.transaction_items.all %}
                 <tr class="{{ row_color }}">
                     <td>{{ transaction_item.product }}</td>
-                    <td>{{ transaction_item.product_group }}</td>
+                    <td>{{ transaction_item.product.product_group }}</td>
                     <td>{{ transaction_item.count }}</td>
                     <td>{{ transaction_item.value }}</td>
 

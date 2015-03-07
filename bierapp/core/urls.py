@@ -12,11 +12,14 @@ urlpatterns = patterns(
     url(r"^balances/users/(?P<id>\d+)/$", "bierapp.core.views.balance_user"),
     url(r"^balances/products/(?P<id>\d+)/$", "bierapp.core.views.balance_product"),
 
-    # Transactions
+    # Transactions and templates
     url(r"^transactions/$", "bierapp.core.views.transactions"),
     url(r"^transactions/export/$", "bierapp.core.views.transactions_export"),
     url(r"^transactions/create/$", "bierapp.core.views.transaction_create"),
     url(r"^transactions/(?P<id>\d+)/$", "bierapp.core.views.transaction"),
+    url(r"^transactions/templates/$", "bierapp.core.views.transaction_templates"),
+    url(r"^transactions/templates/create/$", "bierapp.core.views.transaction_template_create"),
+    url(r"^transactions/templates/(?P<id>\d+)/$", "bierapp.core.views.transaction_template"),
 
     # Product groups and products
     url(r"^groups/$", "bierapp.core.views.product_groups"),

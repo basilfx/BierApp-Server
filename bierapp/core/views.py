@@ -17,7 +17,7 @@ from bierapp.utils.decorators import json_response
 from bierapp.utils.views import paginate
 
 from bierapp.accounts.models import User, UserMembership
-from bierapp.core.filters import TransactionFilter, RangeFilter
+from bierapp.core.filters import TransactionFilter, TransactionRangeFilter
 from bierapp.core.forms import ProductGroupForm, ProductForm, TransactionForm, \
     InlineTransactionItemForm, DummyForm, ExportForm, PickTemplateForm
 from bierapp.core.models import Transaction, TransactionItem, ProductGroup, \
@@ -33,26 +33,23 @@ from cStringIO import StringIO
 import csv
 
 
-def query_balances(site, user, start, per_product):
+def query_balances(transaction_query, user, start, per_product):
     # This can be simplified when Django 1.8 is stable, using conditional
     # aggregations.
     product_groups = list(ProductGroup.objects \
                                       .filter(
-                                          site=site,
-                                          #is_hidden=request.membership.is_admin or None,
-                                          transactionitem__accounted_user=user) \
+                                          products__transactionitem__accounted_user=user,
+                                          products__transactionitem__transaction__in=transaction_query) \
                                       .annotate(
-                                          total_count=Sum("transactionitem__count"),
-                                          total_value=Sum("transactionitem__value")))
+                                          total_count=Sum("products__transactionitem__count"),
+                                          total_value=Sum("products__transactionitem__value")))
     last_balances = list(ProductGroup.objects \
                                      .filter(
-                                         site=site,
-                                         #is_hidden=request.membership.is_admin or None,
-                                         transactionitem__accounted_user=user,
-                                         transactionitem__transaction__created__lte=start) \
+                                         products__transactionitem__accounted_user=user,
+                                         products__transactionitem__transaction__in=transaction_query.filter(created__lte=start)) \
                                      .annotate(
-                                         total_count=Sum("transactionitem__count"),
-                                         total_value=Sum("transactionitem__value")))
+                                         total_count=Sum("products__transactionitem__count"),
+                                         total_value=Sum("products__transactionitem__value")))
 
     for product_group in product_groups:
         product_group.total_count_change = 0
@@ -100,15 +97,18 @@ def index(request):
             .site.transactions \
             .prefetch_related(
                 "transaction_items", "transaction_items__accounted_user",
-                "transaction_items__executing_user", "transaction_items__product",
-                "transaction_items__product_group") \
+                "transaction_items__executing_user",
+                "transaction_items__product",
+                "transaction_items__product__product_group") \
             .filter(transaction_items__accounted_user=request.user) \
             .order_by("-created") \
             .distinct()[:5]
 
         # Current balance
         start = timezone.now() - timedelta(days=7)
-        product_groups = query_balances(request.site, request.user, start, True)
+        product_groups = query_balances(
+            Transaction.objects.filter(site=request.site),
+            request.user, start, True)
 
         return render(request, "bierapp_index.html", locals())
     return render(request, "base_index.html", locals())
@@ -121,13 +121,22 @@ def help(request):
 
 @login_required
 def balance_users(request):
-    start = timezone.now() - timedelta(days=7)
+    range_filter = TransactionRangeFilter(data=request.GET, site=request.site)
+    form_range = range_filter.form
+
+    # Determine start
+    if form_range.is_valid() and form_range.cleaned_data["before"]:
+        start = form_range.cleaned_data["before"] - timedelta(days=7)
+    else:
+        start = timezone.now() - timedelta(days=7)
+
     users = request.site.users \
                         .extra(select={"role": "role"}) \
                         .order_by("role")
 
     for user in users:
-        user.product_groups = query_balances(request.site, user, start, per_product=False)
+        user.product_groups = query_balances(
+            range_filter.qs, user, start, per_product=False)
 
     return render(request, "bierapp_balance_users.html", locals())
 
@@ -135,8 +144,17 @@ def balance_users(request):
 @login_required
 @resolve_user
 def balance_user(request, user):
-    start = timezone.now() - timedelta(days=7)
-    product_groups = query_balances(request.site, user, start, per_product=True)
+    range_filter = TransactionRangeFilter(data=request.GET, site=request.site)
+    form_range = range_filter.form
+
+    # Determine start
+    if form_range.is_valid() and form_range.cleaned_data["before"]:
+        start = form_range.cleaned_data["before"] - timedelta(days=7)
+    else:
+        start = timezone.now() - timedelta(days=7)
+
+    product_groups = query_balances(
+        range_filter.qs, user, start, per_product=True)
 
     return render(request, "bierapp_balance_user.html", locals())
 
@@ -195,12 +213,12 @@ def transactions(request):
     queryset = request.site.transactions.prefetch_related(
         "transaction_items", "transaction_items__accounted_user",
         "transaction_items__executing_user", "transaction_items__product",
-        "transaction_items__product_group").distinct()
+        "transaction_items__product__product_group").distinct()
 
     transactions = TransactionFilter(data=request.GET, site=request.site, queryset=queryset)
 
     form_export = ExportForm()
-    form_filter = transactions.form
+    form_filters = transactions.form
     transactions = paginate(request, transactions)
 
     # Export form action should include current GET parameters
@@ -370,6 +388,22 @@ def transaction_create(request, template=None):
 
 
 @login_required
+def transaction_templates(request):
+    pass
+
+
+@login_required
+@resolve_template
+def transaction_template(request, template):
+    pass
+
+
+@login_required
+def transaction_template_create(request):
+    pass
+
+
+@login_required
 @resolve_transaction
 def transaction(request, transaction):
     return render(request, "bierapp_transaction.html", locals())
@@ -442,7 +476,7 @@ def stats(request):
     if data.get("before") is None:
         data["before"] = "%d-12-31" % datetime.now().year
 
-    form_range = RangeFilter(data=data, site=request.site).form
+    form_filters = TransactionFilter(data=data, site=request.site).form
     action = reverse("bierapp.core.views.stats_transaction_items") + "?" + data.urlencode()
 
     return render(request, "bierapp_stats.html", locals())
@@ -452,21 +486,19 @@ def stats(request):
 @cache_page(60 * 5)
 @json_response
 def stats_transaction_items(request):
-    transactions = RangeFilter(data=request.GET, site=request.site)
+    transactions = TransactionFilter(data=request.GET, site=request.site)
 
     queryset = TransactionItem.objects \
         .filter(transaction__in=transactions) \
-        .prefetch_related("product_group", "executing_user", "product")
+        .prefetch_related("executing_user", "product")
 
     return [{
             "transaction_id": transaction_item.transaction.pk,
             "created": unicode(transaction_item.transaction.created),
             "product_id": transaction_item.product.pk,
             "product": unicode(transaction_item.product),
-            "product_group_id": transaction_item.product_group.pk,
-            "product_group": unicode(transaction_item.product_group),
             "count": transaction_item.count,
             "value": transaction_item.value,
-            "user_id": transaction_item.executing_user.pk,
-            "user": unicode(transaction_item.executing_user),
+            "executing_user_id": transaction_item.executing_user.pk,
+            "executing_user": unicode(transaction_item.executing_user),
         } for transaction_item in queryset]
