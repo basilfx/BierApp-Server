@@ -74,9 +74,9 @@ class UserInfoList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def filter_queryset(self, queryset):
-        site = self.request.site
-        objects = super(UserInfoList, self).filter_queryset(
-            site.users.active())
+        users = self.request.site.users \
+            .extra(select={"role": "role"}) \
+            .order_by("id")
 
         balances = {}
         mapping = {}
@@ -91,9 +91,8 @@ class UserInfoList(generics.ListAPIView):
             .annotate(count=Sum("count")) \
             .annotate(value=Sum("value")) \
             .filter(
-                transaction__site=site,
-                accounted_user__in=objects.values_list("id")) \
-            .order_by("accounted_user")
+                transaction__site=self.request.site,
+                accounted_user__in=users)
 
         rows_b = TransactionItem \
             .objects \
@@ -101,15 +100,17 @@ class UserInfoList(generics.ListAPIView):
             .annotate(total_count=Sum("count")) \
             .annotate(total_value=Sum("value")) \
             .filter(
-                transaction__site=site,
-                accounted_user__in=objects.values_list("id")) \
-            .order_by("accounted_user")
+                transaction__site=self.request.site,
+                accounted_user__in=users)
+
+        rows_a = sorted(rows_a, key=lambda x: x["accounted_user"])
+        rows_b = sorted(rows_b, key=lambda x: x["accounted_user"])
 
         rows_c = XPTransaction \
             .objects \
             .values("user") \
             .annotate(total_value=Sum("value")) \
-            .filter(site=site, user__in=objects.values_list("id")) \
+            .filter(site=self.request.site, user__in=users)
 
         for key, value in groupby(rows_b, key=lambda x: x["accounted_user"]):
             if key not in mapping:
@@ -129,7 +130,7 @@ class UserInfoList(generics.ListAPIView):
         for row in rows_c:
             xps[row["user"]] = row["total_value"]
 
-        for user in objects.all():
+        for user in users.all():
             result.append({
                 "id": user.id,
                 "xp": xps.get(user.id, 0),
