@@ -6,8 +6,13 @@ DEBUG_TEMPLATES = True
 DEBUG_TOOLBAR = True
 DEBUG_IN_TEMPLATES = True
 
-# Make this unique, and don"t share it with anybody.
+# Make this unique, and don't share it with anybody.
 SECRET_KEY = None
+
+# Set this for production
+ALLOWED_HOSTS = [
+
+]
 
 # Celery settings
 BROKER_URL = "amqp://guest:guest@localhost//"
@@ -42,9 +47,6 @@ if DEBUG_TOOLBAR:
 
     # Volgorde is van belang
     INSTALLED_APPS  = INSTALLED_APPS + ("debug_toolbar", )
-    MIDDLEWARE_CLASSES = \
-        ("debug_toolbar.middleware.DebugToolbarMiddleware",) + \
-        MIDDLEWARE_CLASSES
 
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": custom_show_toolbar,
