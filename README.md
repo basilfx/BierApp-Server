@@ -23,6 +23,7 @@ The system is far from ready, but it works and is usable.
 * Clone this repository.
 * Run `python manage.py migrate` to synchronize the database scheme.
 * Run `python manage.py createsuperuser` to create an administrator account.
+* Run `python manage.py bower_install` to install Bower components (requires Bower on your PATH).
 * Run `python manage.py collectstatic` to copy static files to the `static/` folder.
 
 ## Todo
