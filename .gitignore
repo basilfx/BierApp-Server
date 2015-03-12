@@ -5,7 +5,7 @@
 .DS_Store
 
 # Ignore repository file
-/bierapp/conf/local.py
+/bierapp/settings/local.py
 /bierapp/static/bower_components
 /static/
 /media/
