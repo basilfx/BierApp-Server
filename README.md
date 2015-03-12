@@ -7,11 +7,11 @@ This projected once started as a complete studen house management system: cookin
 The system is far from ready, but it works and is usable.
 
 ## Screenshots
-![Overview](https://raw.github.com/basilfx/BierApp-Server/master/doc/screenshots/overview.png)
+![Login screen](https://raw.github.com/basilfx/BierApp-Server/master/docs/screenshots/login.png)
 
-![Overview](https://raw.github.com/basilfx/BierApp-Server/master/doc/screenshots/product_groups.png)
+![Dashboard](https://raw.github.com/basilfx/BierApp-Server/master/docs/screenshots/dashboard.png)
 
-![Overview](https://raw.github.com/basilfx/BierApp-Server/master/doc/screenshots/statistics.png)
+![Statistics](https://raw.github.com/basilfx/BierApp-Server/master/docs/screenshots/statistics.png)
 
 ## Requirements
 * Django 1.7
