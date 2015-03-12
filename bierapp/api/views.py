@@ -5,12 +5,14 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework import permissions
 
-from itertools import groupby
-
 from bierapp.accounts.models import User
 from bierapp.core.filters import TransactionFilter
-from bierapp.core.models import Product, Transaction, TransactionItem, XPTransaction
-from bierapp.api.serializers import ProductSerializer, TransactionSerializer, UserSerializer, UserInfoSerializer
+from bierapp.core.models import Product, Transaction, TransactionItem, \
+    XPTransaction
+from bierapp.api.serializers import ProductSerializer, TransactionSerializer, \
+    UserSerializer, UserInfoSerializer
+
+from itertools import groupby
 
 
 class ApiIndex(views.APIView):
@@ -21,7 +23,8 @@ class ApiIndex(views.APIView):
             "name": request.site.name,
             "users": reverse("bierapp.api.views.users", request=request),
             "products": reverse("bierapp.api.views.products", request=request),
-            "transactions": reverse("bierapp.api.views.transactions", request=request),
+            "transactions": reverse(
+                "bierapp.api.views.transactions", request=request),
             "stats": reverse("bierapp.api.views.stats", request=request)
         })
 
@@ -34,7 +37,9 @@ class ProductList(generics.ListAPIView):
 
     def get_queryset(self):
         site = self.request.site
-        return Product.api_objects.filter(product_group__in=site.product_groups.all())
+        return Product.objects \
+                      .filter(product_group__in=site.product_groups.filter(
+                          is_hidden=False), is_hidden=False)
 
 
 class TransactionList(generics.ListCreateAPIView):
@@ -44,17 +49,11 @@ class TransactionList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        return Transaction.objects.filter(site=self.request.site)
+        return TransactionFilter(
+            data=self.request.QUERY_PARAMS, site=self.request.site).qs
 
-    def filter_queryset(self, queryset):
-        return TransactionFilter(data=self.request.QUERY_PARAMS, site=self.request.site, queryset=queryset).qs
-
-    def pre_save(self, instance):
-        for transaction_item in instance._related_data["transaction_items"]:
-            transaction_item.value = transaction_item.product.value * transaction_item.count
-            transaction_item.product_group = transaction_item.product.product_group
-
-        instance.site = self.request.site
+    def perform_create(self, serializer):
+        serializer.save(site=self.request.site)
 
 
 class UserList(generics.ListAPIView):
@@ -64,8 +63,9 @@ class UserList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        site = self.request.site
-        return site.users.filter()
+        return self.request.site.users \
+                           .extra(select={"role": "role"}) \
+                           .order_by("role")
 
 
 class UserInfoList(generics.ListAPIView):
@@ -76,7 +76,7 @@ class UserInfoList(generics.ListAPIView):
     def filter_queryset(self, queryset):
         site = self.request.site
         objects = super(UserInfoList, self).filter_queryset(
-            site.members.active())
+            site.users.active())
 
         balances = {}
         mapping = {}
@@ -87,16 +87,17 @@ class UserInfoList(generics.ListAPIView):
             .objects \
             .values(
                 "accounted_user", "product", "product__value",
-                "product_group") \
+                "product__product_group") \
             .annotate(count=Sum("count")) \
             .annotate(value=Sum("value")) \
-            .filter(transaction__site=site,
+            .filter(
+                transaction__site=site,
                 accounted_user__in=objects.values_list("id")) \
             .order_by("accounted_user")
 
         rows_b = TransactionItem \
             .objects \
-            .values("accounted_user", "product_group") \
+            .values("accounted_user", "product__product_group") \
             .annotate(total_count=Sum("count")) \
             .annotate(total_value=Sum("value")) \
             .filter(
@@ -115,13 +116,13 @@ class UserInfoList(generics.ListAPIView):
                 mapping[key] = {}
 
             for value2 in value:
-                mapping[key][value2["product_group"]] = value2
+                mapping[key][value2["product__product_group"]] = value2
 
         for key, values in groupby(rows_a, key=lambda x: x["accounted_user"]):
             values = list(values)
 
             for value in values:
-                value.update(mapping[key][value["product_group"]])
+                value.update(mapping[key][value["product__product_group"]])
 
             balances[key] = values
 
@@ -152,7 +153,7 @@ class Stats(views.APIView):
             .aggregate(count=Sum("count"))
 
         return Response({
-            "count": transaction_items["count"]
+            "count": transaction_items["count"] or 0
         })
 
 

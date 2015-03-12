@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.urlresolvers import reverse
 
-from bierapp.core.managers import ApiManager
 from bierapp.accounts.models import User, Site
 
 from django_extensions.db.models import TimeStampedModel
@@ -54,9 +53,7 @@ class TransactionTemplate(models.Model):
         for item in self.items.all():
             transaction.transaction_items.create(
                 product=item.product,
-                product_group=item.product.product_group,
                 count=item.count,
-                value=item.count * item.product.value,
                 accounted_user=accounted_user,
                 executing_user=executing_user
             )
@@ -86,7 +83,6 @@ class Product(TimeStampedModel, models.Model):
     logo_width = models.PositiveIntegerField(null=True)
 
     objects = models.Manager()
-    api_objects = ApiManager()
 
     def __unicode__(self):
         return unicode(self.title)
@@ -117,12 +113,17 @@ class TransactionItem(models.Model):
         "Transaction", related_name="transaction_items")
 
     product = models.ForeignKey(Product)
-    #product_group = models.ForeignKey(ProductGroup)
     count = models.IntegerField(null=False, default=0)
     value = models.DecimalField(max_digits=10, decimal_places=2)
 
     accounted_user = models.ForeignKey(User, related_name="+")
     executing_user = models.ForeignKey(User, related_name="+")
+
+    def save(self, *args, **kwargs):
+        if self.value is None:
+            self.value = self.product.value * self.count
+
+        super(TransactionItem, self).save(*args, **kwargs)
 
 
 class XPTransaction(TimeStampedModel, models.Model):

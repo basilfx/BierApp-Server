@@ -22,8 +22,8 @@ class TransactionFilter(filters.FilterSet):
         group_by_field="role",
         group_label={1: "Admins", 2: "Members", 3: "Guests"},name="transaction_items__executing_user")
 
-    before = filters.DateFilter(name="created", lookup_type="lte")
-    after = filters.DateFilter(name="created", lookup_type="gte")
+    before = filters.DateTimeFilter(name="created", lookup_type="lte")
+    after = filters.DateTimeFilter(name="created", lookup_type="gte")
 
     description = filters.CharFilter(
         name="description", lookup_type="icontains")

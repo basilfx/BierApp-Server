@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from bierapp.accounts.models import User, Site, UserMembership, \
-    ROLE_ADMIN, ROLE_MEMBER
+from bierapp.accounts.models import User, Site
 from bierapp.core.models import Product, Transaction, TransactionItem
 
 import math
@@ -14,11 +13,11 @@ class SiteSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    logo = serializers.SerializerMethodField("get_logo")
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        exclude = ("site", "is_hidden")
+        exclude = ["is_hidden"]
 
     def get_logo(self, product):
         request = self.context["request"]
@@ -30,7 +29,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class TransactionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionItem
-        exclude = ("id", "transaction", "product_group", "value")
+        exclude = ("id", "transaction", "value")
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -40,13 +39,24 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         exclude = ("site", )
 
+    def create(self, validated_data):
+        transaction_items_data = validated_data.pop("transaction_items")
+        transaction = Transaction.objects.create(**validated_data)
+
+        for transaction_item_data in transaction_items_data:
+            transaction_item = TransactionItem(
+                transaction=transaction, **transaction_item_data)
+            transaction_item.save()
+
+        return transaction
+
 
 class BalanceSerializer(serializers.Serializer):
-    product = serializers.Field()
-    count = serializers.Field()
-    value = serializers.Field()
+    product = serializers.ReadOnlyField()
+    count = serializers.ReadOnlyField()
+    value = serializers.ReadOnlyField()
 
-    estimated_count = serializers.SerializerMethodField("get_estimated_count")
+    estimated_count = serializers.SerializerMethodField()
 
     def get_estimated_count(self, info):
         try:
@@ -57,30 +67,24 @@ class BalanceSerializer(serializers.Serializer):
 
 
 class UserInfoSerializer(serializers.Serializer):
-    id = serializers.Field()
-    xp = serializers.Field()
+    id = serializers.ReadOnlyField()
 
+    xp = serializers.ReadOnlyField()
     balance = BalanceSerializer(many=True)
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.SerializerMethodField()
+    role = serializers.ReadOnlyField()
     avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             "id", "first_name", "last_name", "avatar", "avatar_height",
-            "avatar_width", "role", "modified")
+            "avatar_width", "role", "created", "modified")
 
     def get_avatar(self, user):
         request = self.context["request"]
 
         if user.avatar:
             return request.build_absolute_uri(user.avatar.url)
-
-    def get_role(self, user):
-        request = self.context["request"]
-
-        return user.id in UserMembership.objects.filter(
-            site=request.site, role__in=[ROLE_ADMIN, ROLE_MEMBER]).values_list("user_id", flat=True)
