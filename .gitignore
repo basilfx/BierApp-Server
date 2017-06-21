@@ -1,11 +1,10 @@
 # Python files
 *.pyc
-
-# OS-files
-.DS_Store
+__pycache__
 
 # Ignore repository file
 /bierapp/settings/local.py
 /bierapp/static/bower_components
 /static/
 /media/
+/env
