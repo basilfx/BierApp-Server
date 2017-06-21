@@ -1,1 +1,0 @@
-from bierapp import celery

@@ -9,6 +9,3 @@
 /bierapp/static/bower_components
 /static/
 /media/
-
-# Celery
-celerybeat-schedule
