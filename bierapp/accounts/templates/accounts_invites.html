@@ -24,7 +24,7 @@
                     <td>{{ membership_invite.email }}</td>
                     <td>{{ membership_invite.created|date:"Y-m-d H:i" }}</td>
                     <td>
-                        {% url 'bierapp.accounts.views.invite_activate' as activate_url %}
+                        {% url 'accounts:invite_activate' as activate_url %}
                         <a class="btn btn-success" href="{{ activate_url }}?token={{ membership_invite.token }}">Activate</a>
                         <a class="btn btn-danger" href="{{ activate_url }}?token={{ membership_invite.token }}&refuse=1">Refuse</a>
                     </td>

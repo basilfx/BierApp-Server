@@ -1,1 +1,1 @@
-from generic import *
+from bierapp.settings.generic import *

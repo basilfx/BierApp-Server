@@ -28,7 +28,7 @@ from bierapp.core.helpers import InlineTransactionItemFormHelper, \
     InlineTransactionItemAdminFormHelper
 from bierapp.utils.fields import GroupedModelChoiceField
 
-from cStringIO import StringIO
+from io import StringIO
 
 import csv
 
@@ -36,20 +36,22 @@ import csv
 def query_balances(transaction_query, user, start, per_product):
     # This can be simplified when Django 1.8 is stable, using conditional
     # aggregations.
-    product_groups = list(ProductGroup.objects \
-                                      .filter(
-                                          products__transactionitem__accounted_user=user,
-                                          products__transactionitem__transaction__in=transaction_query) \
-                                      .annotate(
-                                          total_count=Sum("products__transactionitem__count"),
-                                          total_value=Sum("products__transactionitem__value")))
-    last_balances = list(ProductGroup.objects \
-                                     .filter(
-                                         products__transactionitem__accounted_user=user,
-                                         products__transactionitem__transaction__in=transaction_query.filter(created__lte=start)) \
-                                     .annotate(
-                                         total_count=Sum("products__transactionitem__count"),
-                                         total_value=Sum("products__transactionitem__value")))
+    product_groups = list(
+        ProductGroup.objects
+            .filter(
+                products__transactionitem__accounted_user=user,
+                products__transactionitem__transaction__in=transaction_query) \
+            .annotate(
+                total_count=Sum("products__transactionitem__count"),
+                total_value=Sum("products__transactionitem__value")))
+    last_balances = list(
+        ProductGroup.objects
+            .filter(
+                products__transactionitem__accounted_user=user,
+                products__transactionitem__transaction__in=transaction_query.filter(created__lte=start)) \
+            .annotate(
+                total_count=Sum("products__transactionitem__count"),
+                total_value=Sum("products__transactionitem__value")))
 
     for product_group in product_groups:
         product_group.total_count_change = 0
@@ -166,7 +168,7 @@ def balance_products(request):
 
     rows = User.objects.raw(
         """
-        SELECT u.*, m.role, IFNULL(total_value, 0) AS total_value, IFNULL(total_count, 0) AS total_count, p.id AS product_id, p.product_group_id AS product_group_id
+        SELECT u.*, m.role, COALESCE(total_value, 0) AS total_value, COALESCE(total_count, 0) AS total_count, p.id AS product_id, p.product_group_id AS product_group_id
         FROM accounts_usermembership m, accounts_user u
         CROSS JOIN core_product p
         LEFT JOIN (
@@ -186,18 +188,20 @@ def balance_products(request):
         product_group = product_groups[row.product_group_id]
         product = products[row.product_id]
 
-        if not product_group in result:
+        if product_group not in result:
             result[product_group] = {}
 
-        if not product in result[product_group]:
+        if product not in result[product_group]:
             result[product_group][product] = []
 
-        product.total_count = getattr(product, "total_count", 0) + row.total_count
-        product.total_value = getattr(product, "total_value", 0) + row.total_value
+        product.total_count = \
+            getattr(product, "total_count", 0) + row.total_count
+        product.total_value = \
+            getattr(product, "total_value", 0) + row.total_value
 
         result[product_group][product].append(row)
 
-    users = result.values()[0].values()[0]
+    users = list(list(result.values())[0].values())[0]
 
     return render(request, "bierapp_balance_products.html", locals())
 
@@ -215,14 +219,16 @@ def transactions(request):
         "transaction_items__executing_user", "transaction_items__product",
         "transaction_items__product__product_group").distinct()
 
-    transactions = TransactionFilter(data=request.GET, site=request.site, queryset=queryset)
+    transactions = TransactionFilter(
+        data=request.GET, site=request.site, queryset=queryset)
 
     form_export = ExportForm()
     form_filters = transactions.form
-    transactions = paginate(request, transactions)
+    transactions = paginate(request, transactions.qs)
 
     # Export form action should include current GET parameters
-    action = reverse("bierapp.core.views.transactions_export") + "?" + request.GET.urlencode()
+    action = reverse("core:transactions_export") + \
+        "?" + request.GET.urlencode()
     form_export.helper.form_action = action
 
     return render(request, "bierapp_transactions.html", locals())
@@ -235,8 +241,10 @@ def transactions_export(request):
         "transaction_items__executing_user", "transaction_items__product",
         "transaction_items__product_group").distinct()
 
-    transactions = TransactionFilter(data=request.GET, site=request.site, queryset=queryset)
-    transaction_items = TransactionItem.objects.filter(transaction__in=transactions)
+    transactions = TransactionFilter(
+        data=request.GET, site=request.site, queryset=queryset)
+    transaction_items = TransactionItem.objects.filter(
+        transaction__in=transactions)
 
     # Export isn"t a page, so redirect back
     form = ExportForm(data=request.GET or None)
@@ -281,13 +289,15 @@ def transactions_export(request):
             content_type="text/csv; charset=utf-8"
         )
 
-        filename = "transactions_%s.csv" % (datetime.now().strftime("%Y-%m-%d"))
-        response["Content-Disposition"] = "attachment; filename=%s" % filename.encode("utf-8")
+        filename = "transactions_%s.csv" % (
+            datetime.now().strftime("%Y-%m-%d"))
+        response["Content-Disposition"] = \
+            "attachment; filename=%s" % filename.encode("utf-8")
 
         # Done
         return response
 
-    return # TODO
+    return  # TODO
 
 
 @login_required
@@ -351,7 +361,8 @@ def transaction_create(request, template=None):
 
             return transaction_item
 
-    TransactionFormSet = inlineformset_factory(Transaction, TransactionItem, form=InnerForm)
+    TransactionFormSet = inlineformset_factory(
+        Transaction, TransactionItem, form=InnerForm)
     form = TransactionForm(site=request.site, data=request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -366,19 +377,24 @@ def transaction_create(request, template=None):
             messages.success(request, _("Transaction added."))
 
             # Redirect
-            return redirect("bierapp.core.views.transactions")
+            return redirect("core:transactions")
 
     formset = TransactionFormSet(data=request.POST or None)
     dummy_form = DummyForm()
 
     # Set template
     if template is not None:
-        form.initial = { "description": template.title }
+        form.initial = {
+            "description": template.title
+        }
         i = 0
 
         for pair_item in template.items.all():
             if i < len(formset.forms):
-                formset.forms[i].initial = { "product": pair_item.product, "count": pair_item.count }
+                formset.forms[i].initial = {
+                    "product": pair_item.product,
+                    "count": pair_item.count
+                }
                 i = i + 1
             else:
                 break
@@ -411,7 +427,8 @@ def transaction(request, transaction):
 
 @login_required
 def product_groups(request):
-    product_groups = request.site.product_groups.annotate(product_count=Count("products"))
+    product_groups = request.site.product_groups.annotate(
+        product_count=Count("products"))
     product_groups = paginate(request, product_groups)
 
     return render(request, "bierapp_product_groups.html", locals())
@@ -458,7 +475,8 @@ def product_group_product_create(request, product_group):
 
         return redirect(product.get_absolute_url())
 
-    return render(request, "bierapp_product_group_product_create.html", locals())
+    return render(
+        request, "bierapp_product_group_product_create.html", locals())
 
 
 @login_required
@@ -477,7 +495,7 @@ def stats(request):
         data["before"] = "%d-12-31" % datetime.now().year
 
     form_filters = TransactionFilter(data=data, site=request.site).form
-    action = reverse("bierapp.core.views.stats_transaction_items") + "?" + data.urlencode()
+    action = reverse("core:stats_transaction_items") + "?" + data.urlencode()
 
     return render(request, "bierapp_stats.html", locals())
 
@@ -485,18 +503,18 @@ def stats(request):
 @login_required
 @cache_page(60 * 5)
 def stats_transaction_items(request):
-    transactions = TransactionFilter(data=request.GET, site=request.site)
+    transactions = TransactionFilter(data=request.GET, site=request.site).qs
 
     queryset = TransactionItem.objects \
         .filter(transaction__in=transactions) \
         .prefetch_related("executing_user", "product")
 
     return StreamingJsonResponse([{
-            "transaction_id": transaction_item.transaction.pk,
-            "created": unicode(transaction_item.transaction.created),
-            "product_id": transaction_item.product.pk,
-            "product": unicode(transaction_item.product),
-            "count": transaction_item.count,
-            "executing_user_id": transaction_item.executing_user.pk,
-            "executing_user": unicode(transaction_item.executing_user),
-        } for transaction_item in queryset])
+        "transaction_id": transaction_item.transaction.pk,
+        "created": str(transaction_item.transaction.created),
+        "product_id": transaction_item.product.pk,
+        "product": str(transaction_item.product),
+        "count": transaction_item.count,
+        "executing_user_id": transaction_item.executing_user.pk,
+        "executing_user": str(transaction_item.executing_user),
+    } for transaction_item in queryset])

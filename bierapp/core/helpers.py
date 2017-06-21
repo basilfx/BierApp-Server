@@ -1,10 +1,11 @@
 from django.core.urlresolvers import reverse
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, HTML, Button, Row, Field, Fieldset
-from crispy_forms.bootstrap import AppendedText, PrependedText, FormActions, InlineField
+from crispy_forms.layout import Layout, Submit, HTML, Field
+from crispy_forms.bootstrap import FormActions, InlineField
 
 from crispy_forms_extra.layout import Tr, Td
+
 
 class ProductGroupFormHelper(FormHelper):
     @property
@@ -18,6 +19,7 @@ class ProductGroupFormHelper(FormHelper):
             )
         )
 
+
 class ProductFormHelper(FormHelper):
     @property
     def layout(self):
@@ -30,6 +32,7 @@ class ProductFormHelper(FormHelper):
                 Submit("submit", "Add", css_class="btn-primary"),
             )
         )
+
 
 class TransactionFormHelper(FormHelper):
     @property
@@ -77,10 +80,12 @@ class InlineTransactionItemAdminFormHelper(InlineTransactionItemFormHelper):
                 Field("product", template="bootstrap3/field_nolabel.html")
             ),
             Td(
-                Field("accounted_user", template="bootstrap3/field_nolabel.html")
+                Field(
+                    "accounted_user", template="bootstrap3/field_nolabel.html")
             ),
             Td(
-                Field("executing_user", template="bootstrap3/field_nolabel.html")
+                Field(
+                    "executing_user", template="bootstrap3/field_nolabel.html")
             ),
             Td(
                 Field("count", template="bootstrap3/field_nolabel.html")
@@ -124,7 +129,8 @@ class PickTemplateFormHelper(FormHelper):
 
     @property
     def form_action(self):
-        return reverse("bierapp.core.views.transaction_create")
+        return reverse("core:transaction_create")
+
 
 class ExportFormHelper(FormHelper):
     @property
@@ -136,6 +142,7 @@ class ExportFormHelper(FormHelper):
     @property
     def form_method(self):
         return "GET"
+
 
 class TransactionFilterHelper(FormHelper):
     @property
@@ -152,6 +159,7 @@ class TransactionFilterHelper(FormHelper):
     @property
     def form_method(self):
         return "GET"
+
 
 class TransactionRangeFilterHelper(FormHelper):
     @property

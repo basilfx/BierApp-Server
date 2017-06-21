@@ -1,30 +1,38 @@
-from django.conf.urls import patterns
+from django.conf.urls import url
 
-urlpatterns = patterns(
-    "",
+from bierapp.accounts.views import profile, password, register, \
+    register_done, invites, invite_activate, sites, site_create, site, \
+    site_switch, site_invite, site_invite_revoke, site_membership_edit, \
+    login, logout
 
+
+app_name = 'accounts'
+
+urlpatterns = [
     # Locations
-    (r"^profile/$", "bierapp.accounts.views.profile"),
-    (r"^profile/password/$", "bierapp.accounts.views.password"),
+    url(r"^profile/$", profile, name='profile'),
+    url(r"^profile/password/$", password, name='password'),
 
     # Registration
-    (r"register/$", "bierapp.accounts.views.register"),
-    (r"register/done/$", "bierapp.accounts.views.register_done"),
+    url(r"register/$", register, name='register'),
+    url(r"register/done/$", register_done, name='register_done'),
 
     # Invites
-    (r"invites/$", "bierapp.accounts.views.invites"),
-    (r"invites/activate/$", "bierapp.accounts.views.invite_activate"),
+    url(r"invites/$", invites, name='invites'),
+    url(r"invites/activate/$", invite_activate, name='invite_activate'),
 
     # Sites
-    (r"sites/$", "bierapp.accounts.views.sites"),
-    (r"sites/create/$", "bierapp.accounts.views.site_create"),
-    (r"sites/(?P<site_id>\d+)/$", "bierapp.accounts.views.site"),
-    (r"sites/(?P<site_id>\d+)/switch/$", "bierapp.accounts.views.site_switch"),
-    (r"sites/(?P<site_id>\d+)/invite/$", "bierapp.accounts.views.site_invite"),
-    (r"sites/(?P<site_id>\d+)/invite/(?P<invite_id>\d+)/revoke/$",
-        "bierapp.accounts.views.site_invite_revoke"),
+    url(r"sites/$", sites, name='sites'),
+    url(r"sites/create/$", site_create, name='site_create'),
+    url(r"sites/(?P<site_id>\d+)/$", site, name='site'),
+    url(r"sites/(?P<site_id>\d+)/switch/$", site_switch, name='site_switch'),
+    url(r"sites/(?P<site_id>\d+)/invite/$", site_invite, name='site_invite'),
+    url(r"sites/(?P<site_id>\d+)/invite/(?P<invite_id>\d+)/revoke/$",
+        site_invite_revoke, name='site_invite_revoke'),
+    url(r"sites/(?P<site_id>\d+)/membership/(?P<membership_id>\d+)/edit/$",
+        site_membership_edit, name='site_membership_edit'),
 
     # Authentication
-    (r"login/$", "bierapp.accounts.views.login"),
-    (r"logout/$", "bierapp.accounts.views.logout"),
-)
+    url(r"login/$", login, name='login'),
+    url(r"logout/$", logout, name='logout'),
+]

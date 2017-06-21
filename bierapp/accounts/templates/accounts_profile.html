@@ -7,7 +7,7 @@
     </div>
 
     <p>
-        {% url 'bierapp.accounts.views.password' as password_url %}
+        {% url 'accounts:password' as password_url %}
 
         {% blocktrans %}
             You can change your password <a href="{{ password_url }}">here</a>.

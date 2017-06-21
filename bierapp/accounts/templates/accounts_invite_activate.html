@@ -14,7 +14,7 @@
                 {% endblocktrans %}
             </div>
 
-            <a href="{% url 'bierapp.accounts.views.site' site_id=invite.site.id as url %}">Go to site</a>
+            <a href="{% url 'accounts:site' site_id=invite.site.id as url %}">Go to site</a>
         {% else %}
             <div class="alert alert-info">
                 {% blocktrans with name=invite.site %}
@@ -22,13 +22,13 @@
                 {% endblocktrans %}
             </div>
 
-            <a href="{% url 'bierapp.accounts.views.sites' %}">Go to sites</a>
+            <a href="{% url 'accounts:sites' %}">Go to sites</a>
         {% endif %}
     {% else %}
         <div class="alert alert-error">
             {% trans 'Invalid or expired invite.' %}
         </div>
 
-        <a href="{% url 'bierapp.accounts.views.sites' %}">Go to sites</a>
+        <a href="{% url 'accounts:sites' %}">Go to sites</a>
     {% endif %}
 {% endblock content %}

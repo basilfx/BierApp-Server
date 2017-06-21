@@ -12,28 +12,27 @@ class ProductGroup(models.Model):
 
     is_hidden = models.BooleanField(default=True)
 
-    def __unicode__(self):
-        return unicode(self.title)
+    def __str__(self):
+        return self.title
 
     def get_absolute_url(self):
-        return reverse(
-            "bierapp.core.views.product_group", kwargs={"id": self.pk})
+        return reverse("core:product_group", kwargs={"id": self.pk})
 
 
 class TransactionTemplateCategory(models.Model):
     site = models.ForeignKey(Site, related_name="+")
     title = models.CharField(max_length=255)
 
-    def __unicode__(self):
-        return unicode(self.title)
+    def __str__(self):
+        return self.title
 
 
 class TransactionTemplate(models.Model):
     category = models.ForeignKey(TransactionTemplateCategory, related_name="+")
     title = models.CharField(max_length=255)
 
-    def __unicode__(self):
-        return unicode(self.title)
+    def __str__(self):
+        return self.title
 
     def to_transaction(self, accounted_user, executing_user=None):
         """
@@ -84,13 +83,12 @@ class Product(TimeStampedModel, models.Model):
 
     objects = models.Manager()
 
-    def __unicode__(self):
-        return unicode(self.title)
+    def __str__(self):
+        return self.title
 
     def get_absolute_url(self):
-        return reverse(
-            "bierapp.core.views.product_group_product",
-            kwargs={"group_id": self.product_group.pk, "id": self.pk})
+        return reverse("core:product_group_product", kwargs={
+            "group_id": self.product_group.pk, "id": self.pk})
 
 
 class Transaction(TimeStampedModel, models.Model):

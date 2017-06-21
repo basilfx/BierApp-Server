@@ -15,7 +15,7 @@
                 <div class="btn-toolbar pull-right no-margin">
                     <div class="btn-group">
                         {% if request.membership.is_admin %}
-                            <a class="btn btn-success" href="{% url 'bierapp.core.views.product_group_product_create' id=product_group.pk %}">
+                            <a class="btn btn-success" href="{% url 'core:product_group_product_create' id=product_group.pk %}">
                                 {% trans 'Add product' %}
                             </a>
                         {% endif %}

@@ -4,6 +4,7 @@ from rest_framework import generics, views
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework import permissions
+from rest_framework.pagination import PageNumberPagination
 
 from bierapp.accounts.models import User
 from bierapp.core.filters import TransactionFilter
@@ -15,23 +16,28 @@ from bierapp.api.serializers import ProductSerializer, TransactionSerializer, \
 from itertools import groupby
 
 
+class StandardPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = "limit"
+
+
 class ApiIndex(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         return Response({
             "name": request.site.name,
-            "users": reverse("bierapp.api.views.users", request=request),
-            "products": reverse("bierapp.api.views.products", request=request),
-            "transactions": reverse(
-                "bierapp.api.views.transactions", request=request),
-            "stats": reverse("bierapp.api.views.stats", request=request)
+            "users": reverse("api_v1:users", request=request),
+            "products": reverse("api_v1:products", request=request),
+            "transactions": reverse("api_v1:transactions", request=request),
+            "stats": reverse("api_v1:stats", request=request)
         })
 
 
 class ProductList(generics.ListAPIView):
     model = Product
     serializer_class = ProductSerializer
+    pagination_class = StandardPagination
 
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -45,12 +51,13 @@ class ProductList(generics.ListAPIView):
 class TransactionList(generics.ListCreateAPIView):
     model = Transaction
     serializer_class = TransactionSerializer
+    pagination_class = StandardPagination
 
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return TransactionFilter(
-            data=self.request.QUERY_PARAMS, site=self.request.site).qs
+            data=self.request.query_params, site=self.request.site).qs
 
     def perform_create(self, serializer):
         serializer.save(site=self.request.site)
@@ -59,6 +66,7 @@ class TransactionList(generics.ListCreateAPIView):
 class UserList(generics.ListAPIView):
     model = User
     serializer_class = UserSerializer
+    pagination_class = StandardPagination
 
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -70,6 +78,7 @@ class UserList(generics.ListAPIView):
 
 class UserInfoList(generics.ListAPIView):
     serializer_class = UserInfoSerializer
+    pagination_class = StandardPagination
 
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -148,7 +157,8 @@ class Stats(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        transactions = TransactionFilter(data=request.GET, site=request.site)
+        transactions = TransactionFilter(
+            data=request.GET, site=request.site).qs
         transaction_items = TransactionItem.objects \
             .filter(transaction__in=transactions, count__lt=0) \
             .aggregate(count=Sum("count"))

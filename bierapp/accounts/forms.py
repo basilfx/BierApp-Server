@@ -1,9 +1,14 @@
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
+from django.contrib.auth.forms import \
+    AuthenticationForm as DjangoAuthenticationForm
 from django import forms
 
-from bierapp.accounts.models import User, UserMembershipInvite, Site
-from bierapp.accounts.helpers import ChangePasswordFormHelper, ChangeProfileFormHelper, RegisterFormHelper, SiteFormHelper, UserMembershipInviteFormHelper, AuthenticationFormHelper, ChooseSiteFormHelper
+from bierapp.accounts.models import User, UserMembershipInvite, \
+    UserMembership, Site
+from bierapp.accounts.helpers import ChangePasswordFormHelper, \
+    ChangeProfileFormHelper, RegisterFormHelper, SiteFormHelper, \
+    UserMembershipInviteFormHelper, AuthenticationFormHelper, \
+    ChooseSiteFormHelper, UserMembershipFormHelper
 
 import time
 
@@ -16,13 +21,18 @@ class AuthenticationForm(DjangoAuthenticationForm):
 
 class ChangePasswordForm(forms.ModelForm):
     error_messages = {
-        "password_invalid": _("Current password does not match the old password."),
+        "password_invalid": _(
+            "Current password does not match the old password."),
         "password_mismatch": _("The two password fields do not match."),
     }
 
-    password_current = forms.CharField(label=_("Current password"), widget=forms.PasswordInput)
-    password1 = forms.CharField(label=_("New password"), widget=forms.PasswordInput)
-    password2 = forms.CharField(label=_("New password confirmation"), widget=forms.PasswordInput, help_text=_("Enter the same password as above, for verification."))
+    password_current = forms.CharField(
+        label=_("Current password"), widget=forms.PasswordInput)
+    password1 = forms.CharField(
+        label=_("New password"), widget=forms.PasswordInput)
+    password2 = forms.CharField(
+        label=_("New password confirmation"), widget=forms.PasswordInput,
+        help_text=_("Enter the same password as above, for verification."))
 
     helper = ChangePasswordFormHelper()
 
@@ -34,7 +44,8 @@ class ChangePasswordForm(forms.ModelForm):
         password_current = self.cleaned_data.get("password_current")
 
         if not self.instance.check_password(password_current):
-            raise forms.ValidationError(self.error_messages["password_invalid"])
+            raise forms.ValidationError(
+                self.error_messages["password_invalid"])
 
         return password_current
 
@@ -74,8 +85,11 @@ class RegisterForm(forms.ModelForm):
         "password_mismatch": _("The two password fields do not match."),
     }
 
-    password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
-    password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput, help_text=_("Enter the same password as above, for verification."))
+    password1 = forms.CharField(
+        label=_("Password"), widget=forms.PasswordInput)
+    password2 = forms.CharField(
+        label=_("Password confirmation"), widget=forms.PasswordInput,
+        help_text=_("Enter the same password as above, for verification."))
 
     helper = RegisterFormHelper()
 
@@ -138,6 +152,13 @@ class SiteForm(forms.ModelForm):
 class UserMembershipInviteForm(forms.ModelForm):
     helper = UserMembershipInviteFormHelper()
 
+    class Meta:
+        model = UserMembershipInvite
+        fields = ("email", "role")
+        widgets = {
+            "role": forms.RadioSelect(),
+        }
+
     def __init__(self, site, roles, *args, **kwargs):
         super(UserMembershipInviteForm, self).__init__(*args, **kwargs)
 
@@ -153,9 +174,18 @@ class UserMembershipInviteForm(forms.ModelForm):
 
         return instance
 
+
+class UserMembershipForm(forms.ModelForm):
+    helper = UserMembershipFormHelper()
+
     class Meta:
-        model = UserMembershipInvite
-        fields = ("email", "role")
+        model = UserMembership
+        fields = ("role", )
         widgets = {
             "role": forms.RadioSelect(),
         }
+
+    def __init__(self, roles, *args, **kwargs):
+        super(UserMembershipForm, self).__init__(*args, **kwargs)
+
+        self.fields["role"].choices = roles

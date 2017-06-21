@@ -13,6 +13,10 @@ ROLE_MEMBER = 2
 ROLE_GUEST = 3
 
 
+def _upload_to(x, y):
+    return "avatars/%d_%s" % (x.id, y)
+
+
 class UserManager(EmailUserManager):
     """
     """
@@ -45,7 +49,7 @@ class User(TimeStampedModel, AbstractEmailUser):
 
     avatar = models.ImageField(
         width_field="avatar_width", height_field="avatar_height",
-        upload_to=lambda x, y: "avatars/%d_%s" % (x.id, y), null=True)
+        upload_to=_upload_to, null=True)
     avatar_width = models.PositiveIntegerField(null=True)
     avatar_height = models.PositiveIntegerField(null=True)
 
@@ -53,12 +57,12 @@ class User(TimeStampedModel, AbstractEmailUser):
 
     objects = UserManager()
 
-    def __unicode__(self):
+    def __str__(self):
         """
         Simple to string which renders first name and last name.
         """
 
-        return self.get_full_name() or unicode()
+        return self.get_full_name() or str()
 
     def get_full_name(self):
         """
@@ -94,8 +98,8 @@ class UserMembershipInvite(TimeStampedModel, models.Model):
     class Meta:
         unique_together = (("site", "email"), )
 
-    def __unicode__(self):
-        return u"%s -> %s (%s)" % (self.site, self.email, self.token)
+    def __str__(self):
+        return "%s -> %s (%s)" % (self.site, self.email, self.token)
 
     def save(self, *args, **kwargs):
         # Generate unique token if empty
@@ -123,8 +127,8 @@ class UserMembership(TimeStampedModel, models.Model):
         ordering = ("position",)
         unique_together = (("user", "site"), )
 
-    def __unicode__(self):
-        return u"%s -> %s" % (self.user, self.site)
+    def __str__(self):
+        return "%s -> %s" % (self.user, self.site)
 
     @property
     def is_admin(self):
@@ -153,9 +157,8 @@ class Site(TimeStampedModel, models.Model):
     class Meta:
         ordering = ("name", )
 
-    def __unicode__(self):
-        return unicode(self.name)
+    def __str__(self):
+        return self.name
 
     def get_absolute_url(self):
-        return reverse(
-            "bierapp.accounts.views.site", kwargs={"site_id": self.id})
+        return reverse('accounts:site', kwargs={'site_id': self.id})

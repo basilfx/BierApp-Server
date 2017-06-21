@@ -1,28 +1,30 @@
+from django.utils.deprecation import MiddlewareMixin
+
 from rest_framework import exceptions
 from rest_framework.authentication import get_authorization_header
 
 from provider.oauth2.models import AccessToken
 
 from bierapp.accounts.models import UserMembership, UserMembershipInvite
-from bierapp.oauth2.models import AccessTokenMembership
+from bierapp.oauth.models import AccessTokenMembership
 
 
-class OAuth2MiddlewareRequest(object):
+class OAuth2MiddlewareRequest(MiddlewareMixin):
     def process_request(self, request):
         auth_header = get_authorization_header(request)
 
-        # Grab access token
+        # Grab access token.
         if not auth_header:
             return
 
-        # Strip access token
-        auth = auth_header.split(" ")
+        # Strip access token.
+        auth = auth_header.decode("ascii").split(" ")
 
         if len(auth) != 2:
             request.oauth2_exception = exceptions.ParseError()
             return
 
-        # Retrieve token from the database
+        # Retrieve token from the database.
         try:
             access_token = AccessToken.objects \
                 .select_related("user") \
@@ -31,17 +33,17 @@ class OAuth2MiddlewareRequest(object):
             request.oauth2_exception = exceptions.AuthenticationFailed()
             return
 
-        # Check expire time
+        # Check expire time.
         if access_token.get_expire_delta() < 0:
             request.oauth2_exception = exceptions.AuthenticationFailed()
             return
 
-        # Check for user to be active
+        # Check for user to be active.
         if not access_token.user.is_active:
             request.oauth2_exception = exceptions.PermissionDenied()
             return
 
-        # Resolve membership
+        # Resolve membership.
         try:
             access_token_membership = AccessTokenMembership.objects \
                 .select_related("membership", "membership__site") \
@@ -49,7 +51,7 @@ class OAuth2MiddlewareRequest(object):
         except AccessTokenMembership.DoesNotExist:
             access_token_membership = None
 
-        # Set required properties
+        # Set required properties.
         request.oauth2_token = access_token
         request.user = request._user = access_token.user
 
@@ -58,7 +60,7 @@ class OAuth2MiddlewareRequest(object):
             request.site = access_token_membership.membership.site
 
 
-class SiteMiddlewareRequest(object):
+class SiteMiddlewareRequest(MiddlewareMixin):
     def process_request(self, request):
         """
         Make the current site available in the parameter "request.membership".

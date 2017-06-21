@@ -15,7 +15,7 @@
                 <div class="col-md-4">
                     <div class="btn-toolbar pull-right no-margin">
                         {% if membership.is_member %}
-                            <a class="btn btn-success" href="{% url 'bierapp.accounts.views.site_invite' site_id=site.id %}">
+                            <a class="btn btn-success" href="{% url 'accounts:site_invite' site_id=site.id %}">
                                 {% if is_admin %}
                                     {% trans 'Invite guest or member' %}
                                 {% else %}
@@ -81,7 +81,11 @@
                                 </td>
                             {% endif %}
                             <td>
-
+                                {% if is_admin %}
+                                    <a class="btn btn-primary" href="{% url 'accounts:site_membership_edit' site_id=site.id membership_id=membership.id %}">
+                                        {% trans 'Edit' %}
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -101,7 +105,7 @@
                             {% endif %}
                             <td>
                                 {% if is_admin %}
-                                    <a class="btn btn-danger" href="{% url 'bierapp.accounts.views.site_invite_revoke' site_id=site.id invite_id=membership_invite.id %}">
+                                    <a class="btn btn-danger" href="{% url 'accounts:site_invite_revoke' site_id=site.id invite_id=membership_invite.id %}">
                                         {% trans 'Revoke invite' %}
                                     </a>
                                 {% endif %}

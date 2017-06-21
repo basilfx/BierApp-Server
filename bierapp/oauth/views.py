@@ -1,8 +1,9 @@
 from provider.oauth2 import views
 from provider.oauth2.models import Grant
+from provider.utils import MergeDict
 
 from bierapp.accounts.models import UserMembership
-from bierapp.oauth2.models import GrantMembership, AccessTokenMembership
+from bierapp.oauth.models import GrantMembership, AccessTokenMembership
 
 
 class Capture(views.Capture):
@@ -24,9 +25,11 @@ class Authorize(views.Authorize):
                 code=code, client=client, user=user)  # Hack
 
             # Forced by remote
-            if "site_id" in request.REQUEST:
+            request_data = MergeDict(request.GET, request.POST)
+
+            if "site_id" in request_data:
                 try:
-                    site_id = request.REQUEST.get("site_id", 0)
+                    site_id = request_data.get("site_id", 0)
                     membership = UserMembership.objects.get(
                         user=user, site_id=site_id)
                 except UserMembership.DoesNotExist:

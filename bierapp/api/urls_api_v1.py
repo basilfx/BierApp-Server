@@ -1,12 +1,15 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
-urlpatterns = patterns(
-    "",
+from bierapp.api.views import index, transactions, products, users_info, \
+    users, stats
 
-    url(r"^$", "bierapp.api.views.index"),
-    url(r"^transactions/$", "bierapp.api.views.transactions"),
-    url(r"^products/$", "bierapp.api.views.products"),
-    url(r"^users/info/$", "bierapp.api.views.users_info"),
-    url(r"^users/$", "bierapp.api.views.users"),
-    url(r"^stats/$", "bierapp.api.views.stats"),
-)
+app_name = "api_v1"
+
+urlpatterns = [
+    url(r"^$", index, name="index"),
+    url(r"^transactions/$", transactions, name="transactions"),
+    url(r"^products/$", products, name="products"),
+    url(r"^users/info/$", users_info, name="users_info"),
+    url(r"^users/$", users, name="users"),
+    url(r"^stats/$", stats, name="stats"),
+]

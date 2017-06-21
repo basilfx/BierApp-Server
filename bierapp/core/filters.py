@@ -9,6 +9,7 @@ import django_filters as filters
 
 class TransactionFilter(filters.FilterSet):
     """
+    Filter for transactions.
     """
 
     product = GroupedModelChoiceFilter(
@@ -17,16 +18,18 @@ class TransactionFilter(filters.FilterSet):
 
     accounted_user = GroupedModelChoiceFilter(
         group_by_field="role",
-        group_label={1: "Admins", 2: "Members", 3: "Guests"},name="transaction_items__accounted_user")
+        group_label={1: "Admins", 2: "Members", 3: "Guests"},
+        name="transaction_items__accounted_user")
     executing_user = GroupedModelChoiceFilter(
         group_by_field="role",
-        group_label={1: "Admins", 2: "Members", 3: "Guests"},name="transaction_items__executing_user")
+        group_label={1: "Admins", 2: "Members", 3: "Guests"},
+        name="transaction_items__executing_user")
 
-    before = filters.DateTimeFilter(name="created", lookup_type="lte")
-    after = filters.DateTimeFilter(name="created", lookup_type="gte")
+    before = filters.DateTimeFilter(name="created", lookup_expr="lte")
+    after = filters.DateTimeFilter(name="created", lookup_expr="gte")
 
     description = filters.CharFilter(
-        name="description", lookup_type="icontains")
+        name="description", lookup_expr="icontains")
 
     class Meta:
         model = Transaction
@@ -60,10 +63,11 @@ class TransactionFilter(filters.FilterSet):
 
 class TransactionRangeFilter(filters.FilterSet):
     """
+    Filter for transactions within a range.
     """
 
-    before = filters.DateTimeFilter(name="created", lookup_type="lte")
-    after = filters.DateTimeFilter(name="created", lookup_type="gte")
+    before = filters.DateTimeFilter(name="created", lookup_expr="lte")
+    after = filters.DateTimeFilter(name="created", lookup_expr="gte")
 
     class Meta:
         model = Transaction

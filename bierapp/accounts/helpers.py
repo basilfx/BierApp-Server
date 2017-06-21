@@ -1,8 +1,8 @@
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Field, Button
-from crispy_forms.bootstrap import PrependedText, FormActions
+from crispy_forms.layout import Layout, Div, Submit, Field
+from crispy_forms.bootstrap import FormActions
 
 
 class AuthenticationFormHelper(FormHelper):
@@ -33,7 +33,8 @@ class ChangePasswordFormHelper(FormHelper):
             Field("password2"),
 
             FormActions(
-                Submit("submit", _("Change password"), css_class="btn-primary"),
+                Submit(
+                    "submit", _("Change password"), css_class="btn-primary"),
             )
         )
 
@@ -81,10 +82,6 @@ class ChooseSiteFormHelper(FormHelper):
             )
         )
 
-    @property
-    def form_class(self):
-        return "form-horizontal"
-
 
 class SiteFormHelper(FormHelper):
     @property
@@ -97,10 +94,6 @@ class SiteFormHelper(FormHelper):
             )
         )
 
-    @property
-    def form_class(self):
-        return "form-horizontal"
-
 
 class UserMembershipInviteFormHelper(FormHelper):
     @property
@@ -111,5 +104,17 @@ class UserMembershipInviteFormHelper(FormHelper):
 
             FormActions(
                 Submit("submit", _("Invite"), css_class="btn-primary"),
+            )
+        )
+
+
+class UserMembershipFormHelper(FormHelper):
+    @property
+    def layout(self):
+        return Layout(
+            Field("role"),
+
+            FormActions(
+                Submit("submit", _("Save"), css_class="btn-primary"),
             )
         )

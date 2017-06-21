@@ -7,10 +7,10 @@ def get_int(haystack, needle, default=0, min_value=None, max_value=None):
         value = default
 
     # Check range
-    if min_value != None:
+    if min_value is not None:
         value = max(min_value, value)
 
-    if max_value != None:
+    if max_value is not None:
         value = min(max_value, value)
 
     # Done

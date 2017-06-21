@@ -7,12 +7,12 @@
     </div>
 
     <p>
-        {% url 'bierapp.accounts.views.index' as profile_url %}
+        {% url 'accounts:index' as profile_url %}
 
         {% blocktrans %}
             Your account has been created. Create your own site, or ask others to invite you!
         {% endblocktrans %}
     </p>
 
-    <a href="{% url 'bierapp.accounts.views.profile' %}">{% trans 'Go to profile' %}</a>
+    <a href="{% url 'accounts:profile' %}">{% trans 'Go to profile' %}</a>
 {% endblock content %}

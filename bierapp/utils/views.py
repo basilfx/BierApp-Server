@@ -2,6 +2,7 @@ from django.core import paginator
 
 from bierapp.utils.types import get_int
 
+
 class Paginator(paginator.Paginator):
     def pages_to_show(self, page):
         # pages_wanted stores the pages we want to see, e.g.
@@ -32,9 +33,10 @@ class Paginator(paginator.Paginator):
         # after them.  For flexibility this is done by looking for
         # anywhere in the list that doesn't increment by 1 over the
         # last entry.
-        skip_pages = [ x[1] for x in zip(pages_to_show[:-1],
-                                         pages_to_show[1:])
-                       if (x[1] - x[0] != 1) ]
+        skip_pages = [
+            x[1] for x in zip(pages_to_show[:-1], pages_to_show[1:])
+            if (x[1] - x[0] != 1)
+        ]
 
         # Each page in skip_pages should be follwed by a skip-marker
         # sentinel (e.g. -1).
@@ -42,6 +44,7 @@ class Paginator(paginator.Paginator):
             pages_to_show.insert(pages_to_show.index(i), -1)
 
         return pages_to_show
+
 
 def paginate(request, objects, limit=15):
     # Build paginator with specific limit

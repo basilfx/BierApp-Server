@@ -13,7 +13,7 @@
             </div>
             <div class="col-md-4">
                 <div class="btn-toolbar pull-right no-margin">
-                    <a class="btn btn-success" href="{% url 'bierapp.accounts.views.site_create' %}">
+                    <a class="btn btn-success" href="{% url 'accounts:site_create' %}">
                         {% trans 'Create site' %}
                     </a>
                 </div>
@@ -39,7 +39,7 @@
                     </td>
                     <td>{{ membership.created|date:"Y-m-d H:i" }}</td>
                     <td>
-                        <a class="btn btn-primary" href="{% url 'bierapp.accounts.views.site_switch' site_id=membership.site.id %}">
+                        <a class="btn btn-primary" href="{% url 'accounts:site_switch' site_id=membership.site.id %}">
                             {% trans 'Switch' %}
                         </a>
                     </td>

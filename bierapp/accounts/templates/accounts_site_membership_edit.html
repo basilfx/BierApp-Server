@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>
+            {% trans 'Edit membership' %}
+        </h1>
+    </div>
+
+    <p>
+        {% blocktrans with user=membership.user name=membership.site %}
+            Change membership of {{ user }} for {{ name }}.
+        {% endblocktrans %}
+    </p>
+
+    {% crispy form %}
+{% endblock content %}

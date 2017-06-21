@@ -15,18 +15,18 @@
     {% if UNCOMPILED_RESOURCES %}
         <!-- JavaScript -->
         <script type="text/javascript" src="{% static 'd3/d3.js' %}"></script>
-        <script type="text/javascript" src="{% static 'crossfilter/crossfilter.js' %}"></script>
+        <script type="text/javascript" src="{% static 'crossfilter2/crossfilter.js' %}"></script>
         <script type="text/javascript" src="{% static 'dcjs/dc.js' %}"></script>
     {% else %}
         <!-- JavaScript -->
         <script type="text/javascript" src="{% static 'd3/d3.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'crossfilter/crossfilter.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'crossfilter2/crossfilter.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'dcjs/dc.min.js' %}"></script>
     {% endif %}
 
     <script type="text/javascript">
         $(document).ready(function() {
-            var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
+            var dateFormat = d3.time.format.iso; // d3.time.format("%Y-%m-%d %H:%M:%S.%L");
             var daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
             var hoursOfDay = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
 
@@ -79,7 +79,7 @@
                     days: data.dimension(function(d) { return d.day }),
                     users: data.dimension(function(d) { return d.executing_user }),
                     products: data.dimension(function(d) { return d.product }),
-                    dayOfWeek: data.dimension(function(d) { return [+d.created.getDay(), +d.created.getHours()] })
+                    dayOfWeek: data.dimension(function(d) { return [+d.created.getHours(), +d.created.getDay()] })
                 };
 
                 var groups = {
@@ -134,14 +134,13 @@
                         .group(group)
                         .xBorderRadius(0)
                         .yBorderRadius(0)
-                        .rows(d3.scale.ordinal().domain(daysOfWeek))
-                        .cols(d3.scale.ordinal().domain(hoursOfDay))
-                        .valueAccessor(function(d) { return daysOfWeek[d.key[0]]; })
-                        .keyAccessor(function(d) { return d.key[1]; })
+                        .rowsLabel(function(d) { return daysOfWeek[d]; })
+                        .valueAccessor(function(d) { return d.key[1]; })
+                        .keyAccessor(function(d) { return d.key[0]; })
                         .colorAccessor(function(d) { return d.value; })
                         .title(function(d) { return d.value; })
                         .colors(d3.scale.linear().domain([0, maxValue]).range(["#0066FF", "#FF0000"]))
-                        .calculateColorDomain();
+                        .calculateColorDomain()
 
                     // Color borders, by overriding the redraw method.
                     var oldRedraw = dest._doRedraw;
@@ -265,7 +264,7 @@
     </p>
 
     <div class="row text-center" id="spinner">
-        <img src="{{ STATIC_URL }}img/spinner.gif">
+        <img src="{% static 'img/spinner.gif' %}">
     </div>
     <div class="row text-center" id="error" style="display: none">
         <h2>{% trans 'Nothing to show. Change your selection criteria and/or filters.' %}</h2>

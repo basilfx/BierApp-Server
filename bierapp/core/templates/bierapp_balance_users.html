@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n future %}
+{% load i18n %}
 
 {% block content %}
     <div class="page-header">
@@ -42,7 +42,7 @@
                     {% if forloop.counter == 1 %}
                         <tr class="{{ row_color }}">
                             <td rowspan="{{ user.product_groups|length }}">
-                                <a href="{% url 'bierapp.core.views.balance_user' id=user.pk %}">
+                                <a href="{% url 'core:balance_user' id=user.pk %}">
                                     {% if request.user == user %}
                                         <b>{{ user }}</b>
                                     {% else %}

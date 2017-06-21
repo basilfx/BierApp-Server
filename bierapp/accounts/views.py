@@ -13,10 +13,11 @@ from bierapp.accounts.models import User, UserMembershipInvite, \
     UserMembership, ROLE_ADMIN, ROLE_MEMBER, ROLE_GUEST
 from bierapp.accounts.forms import RegisterForm, UserMembershipInviteForm, \
     SiteForm, ChangeProfileForm, AuthenticationForm, ChangePasswordForm, \
-    ChooseSiteForm
+    ChooseSiteForm, UserMembershipForm
 from bierapp.accounts.decorators import resolve_membership
 
 import random
+
 
 @login_required
 def password(request):
@@ -29,7 +30,7 @@ def password(request):
         messages.success(request, "Password changed.")
 
         # Redirect back
-        return redirect("bierapp.accounts.views.password")
+        return redirect("accounts:password")
 
     return render(request, "accounts_password.html", locals())
 
@@ -47,7 +48,8 @@ def profile(request):
         messages.success(request, "Profile changed.")
 
         # Redirect back
-        return redirect("bierapp.accounts.views.profile")
+        return redirect("accounts:profile")
+
     return render(request, "accounts_profile.html", locals())
 
 
@@ -99,11 +101,12 @@ def site_create(request):
             site=site, user=request.user, role=ROLE_ADMIN).save()
 
         # Post message
-        messages.success(request, "Site created.")
+        messages.success(request, _("Site created."))
 
         # Redirect to site
-        return redirect("bierapp.accounts.views.site", site_id=site.id)
-    return render(request, "accounts_site_add.html", locals())
+        return redirect("accounts:site", site_id=site.id)
+
+    return render(request, "accounts_site_create.html", locals())
 
 
 @login_required
@@ -129,7 +132,8 @@ def site_invite(request, membership):
     if is_admin:
         roles = [
             (ROLE_GUEST, _("Guest")),
-            (ROLE_MEMBER, _("Member"))]
+            (ROLE_MEMBER, _("Member"))
+        ]
     else:
         roles = [(ROLE_GUEST, _("Guest"))]
 
@@ -167,9 +171,32 @@ def site_invite(request, membership):
             "confirm membership. If the user does not have an account yet, "
             "he or she should register first."))
 
-        return redirect(
-            "bierapp.accounts.views.site", site_id=membership.site.id)
+        return redirect("accounts:site", site_id=membership.site.id)
     return render(request, "accounts_site_invite.html", locals())
+
+
+@login_required
+def site_membership_edit(request, site_id, membership_id):
+    roles = [
+        (ROLE_GUEST, _("Guest")),
+        (ROLE_MEMBER, _("Member")),
+        (ROLE_ADMIN, _("Admin"))
+    ]
+
+    membership = get_object_or_404(
+        UserMembership, id=membership_id, site_id=site_id)
+    form = UserMembershipForm(
+        instance=membership, roles=roles, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+
+        # Post message
+        messages.success(request, _("Membership edited."))
+
+        return redirect("accounts:site", site_id=site_id)
+
+    return render(request, "accounts_site_membership_edit.html", locals())
 
 
 @login_required
@@ -182,7 +209,7 @@ def site_invite_revoke(request, site_id, invite_id):
     get_object_or_404(
         UserMembershipInvite, site__id=site_id, id=invite_id).delete()
 
-    return redirect("bierapp.accounts.views.site", site_id=request.site.id)
+    return redirect("accounts:site", site_id=request.site.id)
 
 
 @login_required
@@ -230,7 +257,7 @@ def register(request):
         auth_login(request, user)
 
         # Redirect to done
-        return redirect("bierapp.accounts.views.register_done")
+        return redirect(register_done)
 
     return render(request, "accounts_register.html", locals())
 
@@ -260,7 +287,8 @@ def login(request):
         "oauth2/authorize" in request.META.get("HTTP_REFERER", "")
 
     # Verify redirect URL
-    redirect_to = request.REQUEST.get(REDIRECT_FIELD_NAME, False)
+    redirect_to = request.GET.get(REDIRECT_FIELD_NAME) or \
+        request.POST.get(REDIRECT_FIELD_NAME)
     safe_url = is_safe_url(url=redirect_to, host=request.get_host())
 
     if not redirect_to or not safe_url:
@@ -310,4 +338,4 @@ def logout(request):
     auth_logout(request)
 
     # Done
-    return redirect("bierapp.accounts.views.login")
+    return redirect("accounts:login")

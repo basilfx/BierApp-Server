@@ -10,7 +10,7 @@
         <meta name="author" content="Bas Stottelaar">
 
         <!-- Style -->
-        {% if UNCOMPILED_RESOURCES %}
+        {% if DEBUG %}
             <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
             <link rel="stylesheet" href="{% static 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css' %}">
         {% else %}
@@ -21,7 +21,7 @@
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
 
         <!-- Scripts -->
-        {% if UNCOMPILED_RESOURCES %}
+        {% if DEBUG %}
             <script type="text/javascript" src="{% static 'jquery/dist/jquery.js' %}"></script>
             <script type="text/javascript" src="{% static 'moment/moment.js' %}"></script>
         {% else %}
@@ -76,7 +76,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a href="{% url 'bierapp.core.views.index' %}" class="navbar-brand">
+                        <a href="{% url 'core:index' %}" class="navbar-brand">
                             <div style="display:inline-block"><img src="{% static 'img/logo.png' %}" style="margin-top: -6px"> <b>BierApp</b></div>
                         </a>
                     </div>
@@ -92,18 +92,18 @@
 
                                         <ul class="dropdown-menu">
                                             <li>
-                                                <a href="{% url 'bierapp.core.views.balance_users' %}">{% trans 'By users' %}</a>
+                                                <a href="{% url 'core:balance_users' %}">{% trans 'By users' %}</a>
                                             </li>
                                             <li>
-                                                <a href="{% url 'bierapp.core.views.balance_products' %}">{% trans 'By products' %}</a>
+                                                <a href="{% url 'core:balance_products' %}">{% trans 'By products' %}</a>
                                             </li>
                                         </ul>
                                     </li>
                                     <li>
-                                        <a href="{% url 'bierapp.core.views.transactions' %}">{% trans 'Transactions' %}</a>
+                                        <a href="{% url 'core:transactions' %}">{% trans 'Transactions' %}</a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'bierapp.core.views.stats' %}">{% trans 'Statistics' %}</a>
+                                        <a href="{% url 'core:stats' %}">{% trans 'Statistics' %}</a>
                                     </li>
                                     {% if request.membership.is_admin %}
                                         <li class="dropdown">
@@ -113,11 +113,11 @@
 
                                             <ul class="dropdown-menu">
                                                 <li>
-                                                    <a href="{% url 'bierapp.core.views.product_groups' %}">{% trans 'Product groups' %}</a>
+                                                    <a href="{% url 'core:product_groups' %}">{% trans 'Product groups' %}</a>
                                                 </li>
                                                 {% comment %}
                                                 <li>
-                                                    <a href="{% url 'bierapp.core.views.transaction_templates' %}">{% trans 'Transaction templates' %}</a>
+                                                    <a href="{% url 'core:transaction_templates' %}">{% trans 'Transaction templates' %}</a>
                                                 </li>
                                                 {% endcomment %}
                                             </ul>
@@ -145,13 +145,13 @@
 
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a href="{% url 'bierapp.accounts.views.profile' %}">{% trans 'My Profile' %}</a>
+                                            <a href="{% url 'accounts:profile' %}">{% trans 'My Profile' %}</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'bierapp.accounts.views.sites' %}">{% trans 'My Sites' %}</a>
+                                            <a href="{% url 'accounts:sites' %}">{% trans 'My Sites' %}</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'bierapp.accounts.views.invites' %}">
+                                            <a href="{% url 'accounts:invites' %}">
                                                 {% trans 'My Invites' %}
 
                                                 {% if request.membership_invites|length > 0 %}
@@ -161,19 +161,19 @@
                                         </li>
                                         <li class="divider"></li>
                                         <li>
-                                            <a href="{% url 'bierapp.accounts.views.logout' %}">{% trans 'Logout' %}</a>
+                                            <a href="{% url 'accounts:logout' %}">{% trans 'Logout' %}</a>
                                         </li>
                                     </ul>
                                 </li>
                             {% else %}
                                 <li>
-                                    <a href="{% url 'bierapp.accounts.views.login' %}">
+                                    <a href="{% url 'accounts:login' %}">
                                         {% trans 'Login or register' %}
                                     </a>
                                 </li>
                             {% endif %}
                             <li>
-                                <a href="{% url 'bierapp.core.views.help' %}" title="{% trans 'Help' %}">
+                                <a href="{% url 'core:help' %}" title="{% trans 'Help' %}">
                                     <i class="glyphicon glyphicon-question-sign glyphicon-white"></i> &nbsp;
                                 </a>
                             </li>
@@ -207,7 +207,7 @@
             {% block content %}{% endblock content %}
         </div>
 
-        {% if UNCOMPILED_RESOURCES %}
+        {% if DEBUG %}
             <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
             <script type="text/javascript" src="{% static 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js' %}"></script>
         {% else %}

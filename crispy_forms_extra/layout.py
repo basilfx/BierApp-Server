@@ -1,8 +1,8 @@
 from crispy_forms.utils import render_field
 from django.template.loader import render_to_string
-from django.template import Context
 
-from crispy_forms.layout import Field, TEMPLATE_PACK
+from crispy_forms.layout import TEMPLATE_PACK
+
 
 class BaseTable(object):
     template = "%s/table_elements.html" % TEMPLATE_PACK
@@ -24,14 +24,15 @@ class BaseTable(object):
         for field in self.fields:
             fields += render_field(field, form, form_style, context)
 
-        return render_to_string(
-            self.template, Context({
-                "tag": self.element,
-                "element": self,
-                "fields": fields}))
+        return render_to_string(self.template, {
+            "tag": self.element,
+            "element": self,
+            "fields": fields})
+
 
 class Td(BaseTable):
     element = "td"
+
 
 class Tr(BaseTable):
     element = "tr"

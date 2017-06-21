@@ -9,3 +9,7 @@
 .glyphicon-danger {
     color: #bd362f;
 }
+
+body {
+    overflow-y: scroll;
+}
