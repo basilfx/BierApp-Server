@@ -13,9 +13,6 @@ middleware here, or combine a Django application with an application of another
 framework.
 """
 
-# Monkey patches
-from gevent import monkey; monkey.patch_all(); # noqa
-
 # Actual imports
 import os
 
