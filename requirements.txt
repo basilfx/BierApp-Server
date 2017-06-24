@@ -1,0 +1,5 @@
+Django>=1.11.0
+django-debug-toolbar>=1.6
+django-extensions>=1.7.6
+psycopg2>=2.7.1
+Pillow>=4.1.0
